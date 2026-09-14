@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Race Engineer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main class="container">
+        <header>
+            <h1>AI Race Engineer</h1>
+            <p>Your personal race engineer.</p>
+        </header>
+
+        <section class="cards" aria-label="Race telemetry">
+            <div class="card"><h2>Speed</h2><p id="speed">184 km/h</p></div>
+            <div class="card"><h2>Lap</h2><p id="lapNumber">1</p></div>
+            <div class="card"><h2>Lap Time</h2><p id="lapTime">00:00.000</p></div>
+            <div class="card"><h2>Best Lap</h2><p id="bestLap">--:--.---</p></div>
+            <div class="card"><h2>Delta</h2><p id="lapDelta">--.---</p></div>
+            <div class="card"><h2>RPM</h2><p id="rpm">6500</p></div>
+            <div class="card"><h2>Gear</h2><p id="gear">4</p></div>
+            <div class="card"><h2>Throttle</h2><p id="throttle">72%</p></div>
+            <div class="card"><h2>Brake</h2><p id="brake">0%</p></div>
+        </section>
+
+        <section class="telemetry-section">
+            <h2>Speed Telemetry</h2>
+            <canvas id="speedChart"></canvas>
+        </section>
+
+        <div class="status">
+            <span class="status-dot"></span>
+            <span id="sessionStatus">OFFLINE</span>
+        </div>
+
+        <div class="timer">
+            <h2>Session Time</h2>
+            <p id="sessionTimer">00:00:00</p>
+        </div>
+
+        <button id="sessionButton" type="button">Start Session</button>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
