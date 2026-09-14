@@ -24,17 +24,18 @@ export function updateTelemetryUI(vehicle) {
 
 export function updateSessionUI(state) {
     elements.lapNumber.textContent = state.lap.number;
+    elements.lapTime.textContent = formatLapTime(state.lap.currentTimeSeconds);
+    elements.bestLap.textContent = state.lap.bestTimeSeconds === null
+        ? "--:--.---"
+        : formatLapTime(state.lap.bestTimeSeconds);
 
-    if (state.lap.bestTimeSeconds === null) {
-        elements.bestLap.textContent = "--:--.---";
+    if (state.lap.deltaSeconds === null) {
         elements.lapDelta.textContent = "--.---";
     } else {
-        elements.bestLap.textContent = formatLapTime(state.lap.bestTimeSeconds);
-        const delta = state.lap.deltaSeconds ?? 0;
-        elements.lapDelta.textContent = `${delta >= 0 ? "+" : ""}${delta.toFixed(3)} s`;
+        const sign = state.lap.deltaSeconds >= 0 ? "+" : "";
+        elements.lapDelta.textContent = `${sign}${state.lap.deltaSeconds.toFixed(3)} s`;
     }
 
-    elements.lapTime.textContent = formatLapTime(state.lap.currentTimeSeconds);
     elements.sessionTimer.textContent = formatSessionTime(state.session.elapsedSeconds);
 }
 
@@ -54,15 +55,16 @@ export function resetSessionUI() {
 
 function formatLapTime(totalSeconds) {
     const minutes = Math.floor(totalSeconds / 60);
-    const seconds = totalSeconds % 60;
+    const wholeSeconds = Math.floor(totalSeconds % 60);
+    const milliseconds = Math.round((totalSeconds % 1) * 1000);
 
-    return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}.000`;
+    return `${String(minutes).padStart(2, "0")}:${String(wholeSeconds).padStart(2, "0")}.${String(milliseconds).padStart(3, "0")}`;
 }
 
 function formatSessionTime(totalSeconds) {
     const hours = Math.floor(totalSeconds / 3600);
     const minutes = Math.floor((totalSeconds % 3600) / 60);
-    const seconds = totalSeconds % 60;
+    const seconds = Math.floor(totalSeconds % 60);
 
     return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 }
