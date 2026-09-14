@@ -19,8 +19,10 @@ export const raceState = {
     lap: {
         number: 1,
         currentTimeSeconds: 0,
+        targetTimeSeconds: 20,
         bestTimeSeconds: null,
-        deltaSeconds: null
+        deltaSeconds: null,
+        completedTimes: []
     },
 
     telemetry: {
@@ -52,8 +54,10 @@ export function resetRaceState() {
 
     raceState.lap.number = 1;
     raceState.lap.currentTimeSeconds = 0;
+    raceState.lap.targetTimeSeconds = 20;
     raceState.lap.bestTimeSeconds = null;
     raceState.lap.deltaSeconds = null;
+    raceState.lap.completedTimes.length = 0;
 
     raceState.telemetry.speed.length = 0;
     raceState.telemetry.rpm.length = 0;
