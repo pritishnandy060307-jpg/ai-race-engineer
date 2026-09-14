@@ -14,38 +14,28 @@ const elements = {
     sessionButton: document.querySelector("#sessionButton")
 };
 
-export function updateTelemetryUI(telemetry) {
-    elements.speed.textContent = `${telemetry.speed} km/h`;
-    elements.rpm.textContent = telemetry.rpm;
-    elements.gear.textContent = telemetry.gear;
-    elements.throttle.textContent = `${telemetry.throttle}%`;
-    elements.brake.textContent = `${telemetry.brake}%`;
+export function updateTelemetryUI(vehicle) {
+    elements.speed.textContent = `${vehicle.speedKmh} km/h`;
+    elements.rpm.textContent = vehicle.rpm;
+    elements.gear.textContent = vehicle.gear;
+    elements.throttle.textContent = `${vehicle.throttlePercent}%`;
+    elements.brake.textContent = `${vehicle.brakePercent}%`;
 }
 
 export function updateSessionUI(state) {
-    elements.lapNumber.textContent = state.lapNumber;
-    elements.bestLap.textContent = state.bestLap === null ? "--:--.---" : "00:20.000";
+    elements.lapNumber.textContent = state.lap.number;
 
-    const lapSeconds = state.sessionSeconds % 20;
-    const minutes = Math.floor(lapSeconds / 60);
-    const seconds = lapSeconds % 60;
-
-    elements.lapTime.textContent =
-        `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}.000`;
-
-    if (state.bestLap !== null) {
-        const delta = lapSeconds - state.bestLap;
-        elements.lapDelta.textContent = `${delta >= 0 ? "+" : ""}${delta.toFixed(3)} s`;
-    } else {
+    if (state.lap.bestTimeSeconds === null) {
+        elements.bestLap.textContent = "--:--.---";
         elements.lapDelta.textContent = "--.---";
+    } else {
+        elements.bestLap.textContent = formatLapTime(state.lap.bestTimeSeconds);
+        const delta = state.lap.deltaSeconds ?? 0;
+        elements.lapDelta.textContent = `${delta >= 0 ? "+" : ""}${delta.toFixed(3)} s`;
     }
 
-    const hours = Math.floor(state.sessionSeconds / 3600);
-    const mins = Math.floor((state.sessionSeconds % 3600) / 60);
-    const secs = state.sessionSeconds % 60;
-
-    elements.sessionTimer.textContent =
-        `${String(hours).padStart(2, "0")}:${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+    elements.lapTime.textContent = formatLapTime(state.lap.currentTimeSeconds);
+    elements.sessionTimer.textContent = formatSessionTime(state.session.elapsedSeconds);
 }
 
 export function setSessionStatus(active) {
@@ -60,4 +50,19 @@ export function resetSessionUI() {
     elements.bestLap.textContent = "--:--.---";
     elements.lapDelta.textContent = "--.---";
     elements.sessionTimer.textContent = "00:00:00";
+}
+
+function formatLapTime(totalSeconds) {
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+
+    return `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}.000`;
+}
+
+function formatSessionTime(totalSeconds) {
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
 }
