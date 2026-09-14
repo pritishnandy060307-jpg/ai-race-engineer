@@ -65,7 +65,8 @@ function startSession() {
     resetSessionUI();
     setSessionStatus(true);
 
-    sessionTimer = setInterval(tickSession, 1000);
+    // 100 ms gives lap timing millisecond precision while keeping the UI smooth.
+    sessionTimer = setInterval(tickSession, 100);
     telemetryTimer = setInterval(updateTelemetry, 500);
 }
 
@@ -82,32 +83,55 @@ function endSession() {
 }
 
 function tickSession() {
-    raceState.session.elapsedSeconds++;
+    raceState.session.elapsedSeconds = Number(
+        (raceState.session.elapsedSeconds + 0.1).toFixed(1)
+    );
 
-    const lapSeconds = raceState.session.elapsedSeconds % 20;
-    raceState.lap.currentTimeSeconds = lapSeconds;
+    raceState.lap.currentTimeSeconds = Number(
+        (raceState.lap.currentTimeSeconds + 0.1).toFixed(1)
+    );
 
-    if (lapSeconds === 0 && raceState.session.elapsedSeconds > 0) {
-        const completedLapTime = 20;
-
-        if (
-            raceState.lap.bestTimeSeconds === null ||
-            completedLapTime < raceState.lap.bestTimeSeconds
-        ) {
-            raceState.lap.bestTimeSeconds = completedLapTime;
-        }
-
-        raceState.lap.number++;
+    // Simulated track: each lap has a slightly different target time.
+    // This lets Best Lap and Delta behave like a real timing system.
+    if (raceState.lap.currentTimeSeconds >= raceState.lap.targetTimeSeconds) {
+        completeLap();
     }
 
-    if (raceState.lap.bestTimeSeconds !== null) {
-        raceState.lap.deltaSeconds =
-            lapSeconds - raceState.lap.bestTimeSeconds;
-    } else {
-        raceState.lap.deltaSeconds = null;
-    }
-
+    updateLapDelta();
     updateSessionUI(raceState);
+}
+
+function completeLap() {
+    const completedLapTime = raceState.lap.currentTimeSeconds;
+
+    raceState.lap.completedTimes.push(completedLapTime);
+
+    if (
+        raceState.lap.bestTimeSeconds === null ||
+        completedLapTime < raceState.lap.bestTimeSeconds
+    ) {
+        raceState.lap.bestTimeSeconds = completedLapTime;
+    }
+
+    raceState.lap.number++;
+    raceState.lap.currentTimeSeconds = 0;
+
+    // Deterministic variation for the simulated driver/track.
+    const lapVariation = [0.0, -0.8, 1.2, -0.4, 0.6];
+    const variation = lapVariation[(raceState.lap.number - 1) % lapVariation.length];
+    raceState.lap.targetTimeSeconds = 20 + variation;
+}
+
+function updateLapDelta() {
+    if (raceState.lap.bestTimeSeconds === null) {
+        raceState.lap.deltaSeconds = null;
+        return;
+    }
+
+    // Positive = currently slower than the best lap.
+    raceState.lap.deltaSeconds = Number(
+        (raceState.lap.currentTimeSeconds - raceState.lap.bestTimeSeconds).toFixed(1)
+    );
 }
 
 function updateTelemetry() {
@@ -124,13 +148,11 @@ function updateTelemetry() {
     raceState.telemetry.throttle.push(telemetry.throttle);
     raceState.telemetry.brake.push(telemetry.brake);
     raceState.telemetry.gear.push(telemetry.gear);
-    raceState.telemetry.timestamps.push(raceState.session.elapsedSeconds + 0.5);
+    raceState.telemetry.timestamps.push(raceState.session.elapsedSeconds);
 
     updateTelemetryUI(raceState.vehicle);
 
-    chartData.labels.push(
-        (raceState.session.elapsedSeconds + 0.5).toFixed(1)
-    );
+    chartData.labels.push(raceState.session.elapsedSeconds.toFixed(1));
     chartData.speed.push(telemetry.speed);
 
     if (chartData.labels.length > 60) {
