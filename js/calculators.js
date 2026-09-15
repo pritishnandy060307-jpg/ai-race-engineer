@@ -126,3 +126,18 @@ export function calculateDownforce({ speedKmh, airDensity, liftCoefficient, refe
     const downforceN = dynamicPressure * liftCoefficient * referenceArea;
     return { speedMs, dynamicPressure, downforceN, downforceKgf: downforceN / 9.81 };
 }
+
+export function calculateWeightTransfer({ mass, cgHeight, wheelbase, trackWidth, longitudinalAccelG, lateralAccelG, staticFrontPercent }) {
+    if (![mass, cgHeight, wheelbase, trackWidth, longitudinalAccelG, lateralAccelG, staticFrontPercent].every(Number.isFinite) || mass <= 0 || cgHeight <= 0 || wheelbase <= 0 || trackWidth <= 0 || staticFrontPercent <= 0 || staticFrontPercent >= 100) return null;
+    const g = 9.81;
+    const weight = mass * g;
+    const longitudinalTransfer = mass * Math.abs(longitudinalAccelG) * g * cgHeight / wheelbase;
+    const lateralTransfer = mass * Math.abs(lateralAccelG) * g * cgHeight / trackWidth;
+    const staticFront = weight * staticFrontPercent / 100;
+    const staticRear = weight - staticFront;
+    const frontLoad = staticFront - longitudinalAccelG * mass * g * cgHeight / wheelbase;
+    const rearLoad = staticRear + longitudinalAccelG * mass * g * cgHeight / wheelbase;
+    const insideLoad = weight / 2 - lateralTransfer / 2;
+    const outsideLoad = weight / 2 + lateralTransfer / 2;
+    return { weight, longitudinalTransfer, lateralTransfer, frontLoad, rearLoad, insideLoad, outsideLoad };
+}
