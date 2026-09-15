@@ -1,6 +1,6 @@
 import { raceState, resetRaceState } from "./js/state.js";
 import { generateTelemetry } from "./js/telemetry.js";
-import { calculateVehicleSpeed, calculateInflationLayer, calculateInletTurbulence, calculateParticleSettling, calculateHumidity, calculateBrakeBias, calculateStoppingDistance, calculateCorneringSpeed } from "./js/calculators.js";
+import { calculateVehicleSpeed, calculateInflationLayer, calculateInletTurbulence, calculateParticleSettling, calculateHumidity, calculateBrakeBias, calculateStoppingDistance, calculateCorneringSpeed, calculateLateralG } from "./js/calculators.js";
 import { updateTelemetryUI, updateSessionUI, setSessionStatus, resetSessionUI } from "./js/ui.js";
 
 const button = document.querySelector("#sessionButton");
@@ -13,19 +13,14 @@ const calculateHumidityButton = document.querySelector("#calculateHumidityButton
 const calculateBrakeBiasButton = document.querySelector("#calculateBrakeBiasButton");
 const calculateStoppingButton = document.querySelector("#calculateStoppingButton");
 const calculateCornerButton = document.querySelector("#calculateCornerButton");
+const calculateLateralGButton = document.querySelector("#calculateLateralGButton");
 
 let sessionTimer = null;
 let telemetryTimer = null;
 const chartData = { labels: [], speed: [] };
-
-// Keep calculator controls working even if the external Chart.js CDN is unavailable.
 let chart = null;
 if (speedChartCanvas && typeof Chart !== "undefined") {
-    chart = new Chart(speedChartCanvas, {
-        type: "line",
-        data: { labels: chartData.labels, datasets: [{ label: "Speed (km/h)", data: chartData.speed, borderWidth: 2, tension: 0.25, pointRadius: 0 }] },
-        options: { responsive: true, maintainAspectRatio: false, animation: false, scales: { x: { title: { display: true, text: "Time (s)" } }, y: { title: { display: true, text: "Speed (km/h)" }, beginAtZero: true } } }
-    });
+    chart = new Chart(speedChartCanvas, { type: "line", data: { labels: chartData.labels, datasets: [{ label: "Speed (km/h)", data: chartData.speed, borderWidth: 2, tension: 0.25, pointRadius: 0 }] }, options: { responsive: true, maintainAspectRatio: false, animation: false, scales: { x: { title: { display: true, text: "Time (s)" } }, y: { title: { display: true, text: "Speed (km/h)" }, beginAtZero: true } } } });
 }
 
 button?.addEventListener("click", toggleSession);
@@ -37,18 +32,12 @@ calculateHumidityButton?.addEventListener("click", calculateHumidityTool);
 calculateBrakeBiasButton?.addEventListener("click", calculateBrakeBiasTool);
 calculateStoppingButton?.addEventListener("click", calculateStoppingTool);
 calculateCornerButton?.addEventListener("click", calculateCorneringTool);
+calculateLateralGButton?.addEventListener("click", calculateLateralGTool);
 
 function value(id) { const element = document.querySelector(`#${id}`); return element ? Number.parseFloat(element.value) : NaN; }
 function show(id, text) { const element = document.querySelector(`#${id}`); if (element) element.textContent = text; }
 function fmt(x, digits = 4) { return Number.isFinite(x) ? x.toFixed(digits) : "—"; }
-
-function calculateGear() {
-    const engineRpm = value("engineRpmInput"), gearRatio = value("gearRatioInput"), finalDriveRatio = value("finalDriveInput"), tyreDiameterM = value("tyreDiameterInput");
-    if (![engineRpm, gearRatio, finalDriveRatio, tyreDiameterM].every(Number.isFinite) || engineRpm < 0 || gearRatio <= 0 || finalDriveRatio <= 0 || tyreDiameterM <= 0) { show("calculatorError", "Please enter valid positive values."); return; }
-    const wheelRpm = engineRpm / (gearRatio * finalDriveRatio);
-    const vehicleSpeed = calculateVehicleSpeed({ engineRpm, gearRatio, finalDriveRatio, tyreDiameterM });
-    show("wheelRpmResult", `${wheelRpm.toFixed(0)} rpm`); show("vehicleSpeedResult", `${vehicleSpeed.toFixed(1)} km/h`); show("calculatorError", "");
-}
+function calculateGear() { const engineRpm = value("engineRpmInput"), gearRatio = value("gearRatioInput"), finalDriveRatio = value("finalDriveInput"), tyreDiameterM = value("tyreDiameterInput"); if (![engineRpm, gearRatio, finalDriveRatio, tyreDiameterM].every(Number.isFinite) || engineRpm < 0 || gearRatio <= 0 || finalDriveRatio <= 0 || tyreDiameterM <= 0) { show("calculatorError", "Please enter valid positive values."); return; } const wheelRpm = engineRpm / (gearRatio * finalDriveRatio); const vehicleSpeed = calculateVehicleSpeed({ engineRpm, gearRatio, finalDriveRatio, tyreDiameterM }); show("wheelRpmResult", `${wheelRpm.toFixed(0)} rpm`); show("vehicleSpeedResult", `${vehicleSpeed.toFixed(1)} km/h`); show("calculatorError", ""); }
 function calculateInflation() { const result = calculateInflationLayer({ velocity: value("inflVelocity"), lengthScale: value("inflLength"), viscosity: value("inflViscosity"), density: value("inflDensity"), targetYPlus: value("inflYPlus"), layers: value("inflLayers") }); if (!result) { show("inflError", "Enter valid values."); return; } show("inflError", ""); show("inflFirst", result.firstLayer.toExponential(4)); show("inflFinal", result.finalLayer.toExponential(4)); show("inflDelta", result.delta99.toExponential(4)); show("inflGrowth", fmt(result.growthRatio, 4)); }
 function calculateTurbulence() { const result = calculateInletTurbulence({ velocity: value("turbVelocity"), intensityPercent: value("turbIntensity"), lengthScale: value("turbLength") }); if (!result) { show("turbError", "Enter valid velocity, intensity and length scale."); return; } show("turbError", ""); show("turbK", result.k.toExponential(4)); show("turbOmega", result.omega.toExponential(4)); show("turbEpsilon", result.epsilon.toExponential(4)); show("turbNu", result.turbulentViscosity.toExponential(4)); }
 function calculateParticle() { const fluid = document.querySelector("#particleFluid")?.value; const properties = fluid === "air" ? { density: 1.225, viscosity: 1.81e-5 } : { density: 998, viscosity: 1.002e-3 }; const result = calculateParticleSettling({ diameter: value("particleDiameter"), particleDensity: value("particleDensity"), fluidDensity: properties.density, fluidViscosity: properties.viscosity }); if (!result) { show("particleError", "Particle density must exceed fluid density and all values must be valid."); return; } show("particleError", ""); show("particleRe", fmt(result.reynolds, 4)); show("particleCd", fmt(result.dragCoefficient, 4)); show("particleVelocity", result.velocity.toExponential(4)); }
@@ -56,6 +45,7 @@ function calculateHumidityTool() { const result = calculateHumidity({ temperatur
 function calculateBrakeBiasTool() { const result = calculateBrakeBias({ mass: value("brakeMass"), cgHeight: value("brakeCgHeight"), wheelbase: value("brakeWheelbase"), staticFrontPercent: value("brakeFrontPercent"), decelerationG: value("brakeDecelG") }); if (!result) { show("brakeError", "Enter valid values. Rear axle load must remain positive during braking."); return; } show("brakeError", ""); show("brakeFrontBias", `${result.frontBiasPercent.toFixed(2)}%`); show("brakeRearBias", `${result.rearBiasPercent.toFixed(2)}%`); show("brakeLoadTransfer", `${result.loadTransfer.toFixed(1)} N`); show("brakeTotalForce", `${result.totalBrakingForce.toFixed(1)} N`); }
 function calculateStoppingTool() { const result = calculateStoppingDistance({ speedKmh: value("stopSpeed"), reactionTime: value("stopReaction"), decelerationG: value("stopDecel") }); if (!result) { show("stopError", "Enter valid speed, reaction time and positive braking deceleration."); return; } show("stopError", ""); show("stopReactionDistance", `${result.reactionDistance.toFixed(2)} m`); show("stopBrakingDistance", `${result.brakingDistance.toFixed(2)} m`); show("stopTotalDistance", `${result.totalDistance.toFixed(2)} m`); }
 function calculateCorneringTool() { const result = calculateCorneringSpeed({ radius: value("cornerRadius"), frictionCoefficient: value("cornerMu") }); if (!result) { show("cornerError", "Enter a positive corner radius and friction coefficient."); return; } show("cornerError", ""); show("cornerSpeedMs", `${result.speedMs.toFixed(2)} m/s`); show("cornerSpeedKmh", `${result.speedKmh.toFixed(2)} km/h`); show("cornerLateralG", `${result.lateralG.toFixed(2)} g`); }
+function calculateLateralGTool() { const result = calculateLateralG({ speedKmh: value("lateralSpeed"), radius: value("lateralRadius") }); if (!result) { show("lateralError", "Enter a valid speed and positive corner radius."); return; } show("lateralError", ""); show("lateralSpeedMs", `${result.speedMs.toFixed(2)} m/s`); show("lateralAccel", `${result.lateralAcceleration.toFixed(2)} m/s²`); show("lateralG", `${result.lateralG.toFixed(2)} g`); }
 
 function toggleSession() { if (raceState.session.active) endSession(); else startSession(); }
 function startSession() { resetRaceState(); raceState.session.active = true; raceState.session.status = "SESSION ACTIVE"; clearChartHistory(); resetSessionUI(); setSessionStatus(true); sessionTimer = setInterval(tickSession, 100); telemetryTimer = setInterval(updateTelemetry, 500); }
