@@ -142,6 +142,24 @@ export function calculateWeightTransfer({ mass, cgHeight, wheelbase, trackWidth,
     return { weight, longitudinalTransfer, lateralTransfer, frontLoad, rearLoad, insideLoad, outsideLoad };
 }
 
+export function calculateTyreLoadTransfer({ mass, cgHeight, trackWidth, lateralAccelG, staticFrontPercent, frontRollStiffnessPercent }) {
+    if (![mass, cgHeight, trackWidth, lateralAccelG, staticFrontPercent, frontRollStiffnessPercent].every(Number.isFinite) || mass <= 0 || cgHeight <= 0 || trackWidth <= 0 || lateralAccelG < 0 || staticFrontPercent <= 0 || staticFrontPercent >= 100 || frontRollStiffnessPercent < 0 || frontRollStiffnessPercent > 100) return null;
+    const g = 9.81;
+    const weight = mass * g;
+    const lateralAcceleration = lateralAccelG * g;
+    const totalAxleTransfer = mass * lateralAcceleration * cgHeight / trackWidth;
+    const frontTransfer = totalAxleTransfer * frontRollStiffnessPercent / 100;
+    const rearTransfer = totalAxleTransfer - frontTransfer;
+    const frontAxleLoad = weight * staticFrontPercent / 100;
+    const rearAxleLoad = weight - frontAxleLoad;
+    const frontInside = frontAxleLoad / 2 - frontTransfer;
+    const frontOutside = frontAxleLoad / 2 + frontTransfer;
+    const rearInside = rearAxleLoad / 2 - rearTransfer;
+    const rearOutside = rearAxleLoad / 2 + rearTransfer;
+    if ([frontInside, rearInside].some(load => load < 0)) return null;
+    return { totalAxleTransfer, frontTransfer, rearTransfer, frontInside, frontOutside, rearInside, rearOutside };
+}
+
 // Hide dashboard-only session controls when a calculator category is selected.
 document.addEventListener("click", event => {
     const navButton = event.target.closest(".nav-button");
@@ -153,3 +171,27 @@ document.addEventListener("click", event => {
         if (element) element.hidden = !dashboardVisible;
     });
 });
+
+function ensureTyreLoadTransferSection() {
+    if (document.querySelector("#tyreLoadTransferSection")) return;
+    const section = document.createElement("section");
+    section.id = "tyreLoadTransferSection";
+    section.className = "calculator-section";
+    section.setAttribute("aria-label", "Brake bias and tyre load transfer calculator");
+    section.innerHTML = `<h2>Tyre Load Transfer Calculator</h2><p class="calculator-description">Estimate lateral load transfer and the resulting inside/outside tyre loads using front roll-stiffness distribution.</p><div class="calculator-grid"><label>Vehicle Mass (kg)<input id="tltMass" type="number" min="1" step="1" value="250"></label><label>CG Height (m)<input id="tltCgHeight" type="number" min="0.001" step="0.001" value="0.30"></label><label>Track Width (m)<input id="tltTrack" type="number" min="0.01" step="0.01" value="1.20"></label><label>Lateral Acceleration (g)<input id="tltLatG" type="number" min="0" step="0.01" value="1.20"></label><label>Static Front Weight (%)<input id="tltFrontPercent" type="number" min="0.1" max="99.9" step="0.1" value="45"></label><label>Front Roll Stiffness (%)<input id="tltRollPercent" type="number" min="0" max="100" step="1" value="50"></label></div><button id="calculateTyreLoadTransferButton" type="button">Calculate</button><div class="calculator-results calculator-results-6"><div class="result-card"><span>Total Load Transfer</span><strong id="tltTotal">—</strong></div><div class="result-card"><span>Front Axle Transfer</span><strong id="tltFront">—</strong></div><div class="result-card"><span>Rear Axle Transfer</span><strong id="tltRear">—</strong></div><div class="result-card"><span>Front Inside / Outside</span><strong id="tltFrontLoads">—</strong></div><div class="result-card"><span>Rear Inside / Outside</span><strong id="tltRearLoads">—</strong></div><div class="result-card"><span>Transfer Split</span><strong id="tltSplit">—</strong></div></div><p id="tltError" class="calculator-error" aria-live="polite"></p>`;
+    document.querySelector("#weightTransferSection")?.after(section) || document.querySelector("main")?.appendChild(section);
+    document.querySelector("#calculateTyreLoadTransferButton")?.addEventListener("click", () => {
+        const result = calculateTyreLoadTransfer({ mass: Number.parseFloat(document.querySelector("#tltMass")?.value), cgHeight: Number.parseFloat(document.querySelector("#tltCgHeight")?.value), trackWidth: Number.parseFloat(document.querySelector("#tltTrack")?.value), lateralAccelG: Number.parseFloat(document.querySelector("#tltLatG")?.value), staticFrontPercent: Number.parseFloat(document.querySelector("#tltFrontPercent")?.value), frontRollStiffnessPercent: Number.parseFloat(document.querySelector("#tltRollPercent")?.value) });
+        const show = (id, text) => { const el = document.querySelector(`#${id}`); if (el) el.textContent = text; };
+        if (!result) { show("tltError", "Check the inputs. Inside tyre load cannot be negative."); return; }
+        show("tltError", "");
+        show("tltTotal", `${result.totalAxleTransfer.toFixed(1)} N`);
+        show("tltFront", `${result.frontTransfer.toFixed(1)} N`);
+        show("tltRear", `${result.rearTransfer.toFixed(1)} N`);
+        show("tltFrontLoads", `${result.frontInside.toFixed(1)} / ${result.frontOutside.toFixed(1)} N`);
+        show("tltRearLoads", `${result.rearInside.toFixed(1)} / ${result.rearOutside.toFixed(1)} N`);
+        show("tltSplit", `${(result.frontTransfer / result.totalAxleTransfer * 100 || 0).toFixed(1)}% F / ${(result.rearTransfer / result.totalAxleTransfer * 100 || 0).toFixed(1)}% R`);
+    });
+}
+
+ensureTyreLoadTransferSection();
