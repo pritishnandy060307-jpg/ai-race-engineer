@@ -1,5 +1,6 @@
 import { raceState, resetRaceState } from "./js/state.js";
 import { generateTelemetry } from "./js/telemetry.js";
+import { calculateVehicleSpeed } from "./js/calculators.js";
 import {
     updateTelemetryUI,
     updateSessionUI,
@@ -9,6 +10,7 @@ import {
 
 const button = document.querySelector("#sessionButton");
 const speedChartCanvas = document.querySelector("#speedChart");
+const calculateGearButton = document.querySelector("#calculateGearButton");
 
 let sessionTimer = null;
 let telemetryTimer = null;
@@ -47,6 +49,7 @@ const chart = new Chart(speedChartCanvas, {
 });
 
 button.addEventListener("click", toggleSession);
+calculateGearButton.addEventListener("click", calculateGear);
 
 function toggleSession() {
     if (raceState.session.active) {
@@ -161,6 +164,33 @@ function updateTelemetry() {
     }
 
     chart.update();
+}
+
+function calculateGear() {
+    const engineRpm = Number(document.querySelector("#engineRpmInput").value);
+    const gearRatio = Number(document.querySelector("#gearRatioInput").value);
+    const finalDriveRatio = Number(document.querySelector("#finalDriveInput").value);
+    const tyreDiameterM = Number(document.querySelector("#tyreDiameterInput").value);
+
+    const errorElement = document.querySelector("#calculatorError");
+
+    if (![engineRpm, gearRatio, finalDriveRatio, tyreDiameterM].every(Number.isFinite) ||
+        engineRpm < 0 || gearRatio <= 0 || finalDriveRatio <= 0 || tyreDiameterM <= 0) {
+        errorElement.textContent = "Please enter valid positive values.";
+        return;
+    }
+
+    const wheelRpm = engineRpm / (gearRatio * finalDriveRatio);
+    const vehicleSpeed = calculateVehicleSpeed({
+        engineRpm,
+        gearRatio,
+        finalDriveRatio,
+        tyreDiameterM
+    });
+
+    document.querySelector("#wheelRpmResult").textContent = `${wheelRpm.toFixed(0)} rpm`;
+    document.querySelector("#vehicleSpeedResult").textContent = `${vehicleSpeed.toFixed(1)} km/h`;
+    errorElement.textContent = "";
 }
 
 function clearChartHistory() {
