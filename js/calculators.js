@@ -104,3 +104,10 @@ export function calculateStoppingDistance({ speedKmh, reactionTime, deceleration
     const brakingDistance = speedMs * speedMs / (2 * decelerationG * g);
     return { speedMs, reactionDistance, brakingDistance, totalDistance: reactionDistance + brakingDistance };
 }
+
+export function calculateCorneringSpeed({ radius, frictionCoefficient }) {
+    if (![radius, frictionCoefficient].every(Number.isFinite) || radius <= 0 || frictionCoefficient <= 0) return null;
+    const g = 9.81;
+    const speedMs = Math.sqrt(frictionCoefficient * g * radius);
+    return { speedMs, speedKmh: speedMs * 3.6, lateralG: frictionCoefficient };
+}
