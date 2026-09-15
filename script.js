@@ -3,6 +3,18 @@ import { generateTelemetry } from "./js/telemetry.js";
 import { calculateVehicleSpeed, calculateInflationLayer, calculateInletTurbulence, calculateParticleSettling, calculateHumidity, calculateBrakeBias, calculateStoppingDistance, calculateCorneringSpeed, calculateLateralG, calculateDownforce, calculateWeightTransfer } from "./js/calculators.js";
 import { updateTelemetryUI, updateSessionUI, setSessionStatus, resetSessionUI } from "./js/ui.js";
 
+function ensureWeightTransferSection() {
+    if (document.querySelector("#weightTransferSection")) return;
+    const section = document.createElement("section");
+    section.id = "weightTransferSection";
+    section.className = "calculator-section";
+    section.setAttribute("aria-label", "Weight transfer calculator");
+    section.innerHTML = `<h2>Weight Transfer Calculator</h2><p class="calculator-description">Calculate longitudinal and lateral load transfer from vehicle mass, CG geometry and acceleration.</p><div class="calculator-grid"><label>Vehicle Mass (kg)<input id="wtMass" type="number" min="1" step="1" value="250"></label><label>CG Height (m)<input id="wtCgHeight" type="number" min="0.001" step="0.001" value="0.30"></label><label>Wheelbase (m)<input id="wtWheelbase" type="number" min="0.01" step="0.01" value="1.60"></label><label>Track Width (m)<input id="wtTrackWidth" type="number" min="0.01" step="0.01" value="1.20"></label><label>Longitudinal Acceleration (g)<input id="wtLongG" type="number" step="0.01" value="0.80"></label><label>Lateral Acceleration (g)<input id="wtLatG" type="number" min="0" step="0.01" value="1.20"></label><label>Static Front Weight (%)<input id="wtFrontPercent" type="number" min="0.1" max="99.9" step="0.1" value="45"></label></div><button id="calculateWeightTransferButton" type="button">Calculate</button><div class="calculator-results calculator-results-6"><div class="result-card"><span>Longitudinal Transfer</span><strong id="wtLongTransfer">—</strong></div><div class="result-card"><span>Lateral Transfer</span><strong id="wtLatTransfer">—</strong></div><div class="result-card"><span>Front Axle Load</span><strong id="wtFrontLoad">—</strong></div><div class="result-card"><span>Rear Axle Load</span><strong id="wtRearLoad">—</strong></div><div class="result-card"><span>Inside Load</span><strong id="wtInsideLoad">—</strong></div><div class="result-card"><span>Outside Load</span><strong id="wtOutsideLoad">—</strong></div></div><p id="wtError" class="calculator-error" aria-live="polite"></p>`;
+    document.querySelector(".calculator-section:last-of-type")?.after(section) || document.querySelector("main")?.appendChild(section);
+}
+
+ensureWeightTransferSection();
+
 const button = document.querySelector("#sessionButton");
 const speedChartCanvas = document.querySelector("#speedChart");
 const calculateGearButton = document.querySelector("#calculateGearButton");
@@ -59,9 +71,7 @@ function setupNavigation() {
     nav.id = "toolNavigation";
     nav.className = "tool-navigation";
     nav.setAttribute("aria-label", "Calculator categories");
-    const categories = [
-        ["all", "🏁 All Tools"], ["dashboard", "📡 Dashboard"], ["vehicle", "🚗 Vehicle Dynamics"], ["brakes", "🛞 Brakes & Tyres"], ["aero", "🌬️ Aerodynamics"], ["powertrain", "🔧 Powertrain"], ["fluid", "💧 Fluid & CFD"], ["suspension", "🔩 Suspension"]
-    ];
+    const categories = [["all", "🏁 All Tools"], ["dashboard", "📡 Dashboard"], ["vehicle", "🚗 Vehicle Dynamics"], ["brakes", "🛞 Brakes & Tyres"], ["aero", "🌬️ Aerodynamics"], ["powertrain", "🔧 Powertrain"], ["fluid", "💧 Fluid & CFD"], ["suspension", "🔩 Suspension"]];
     categories.forEach(([id, label]) => { const btn = document.createElement("button"); btn.type = "button"; btn.className = "nav-button"; btn.dataset.category = id; btn.textContent = label; btn.addEventListener("click", () => filterTools(id)); nav.appendChild(btn); });
     document.querySelector("header")?.after(nav);
     filterTools("all");
@@ -79,15 +89,9 @@ function categoryForSection(section) {
 
 function filterTools(category) {
     document.querySelectorAll(".nav-button").forEach(btn => btn.classList.toggle("active", btn.dataset.category === category));
-    document.querySelectorAll(".calculator-section, .telemetry-section").forEach(section => {
-        section.dataset.category = categoryForSection(section);
-        section.hidden = category !== "all" && section.dataset.category !== category;
-    });
+    document.querySelectorAll(".calculator-section, .telemetry-section").forEach(section => { section.dataset.category = categoryForSection(section); section.hidden = category !== "all" && section.dataset.category !== category; });
     document.querySelectorAll(".tool-category-title").forEach(title => title.remove());
-    if (category !== "all") {
-        const visible = document.querySelector(`.calculator-section:not([hidden]), .telemetry-section:not([hidden])`);
-        if (visible) { const title = document.createElement("h2"); title.className = "tool-category-title"; title.textContent = document.querySelector(`.nav-button[data-category="${category}"]`)?.textContent || "Tools"; visible.before(title); }
-    }
+    if (category !== "all") { const visible = document.querySelector(`.calculator-section:not([hidden]), .telemetry-section:not([hidden])`); if (visible) { const title = document.createElement("h2"); title.className = "tool-category-title"; title.textContent = document.querySelector(`.nav-button[data-category="${category}"]`)?.textContent || "Tools"; visible.before(title); } }
 }
 
 setupNavigation();
