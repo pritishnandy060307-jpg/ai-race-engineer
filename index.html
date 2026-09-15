@@ -29,20 +29,25 @@
         </section>
 
         <section class="calculator-section" aria-label="Stopping distance calculator">
-            <h2>Stopping Distance Calculator</h2>
-            <p class="calculator-description">Calculate braking distance and total stopping distance from initial speed, reaction time and braking deceleration.</p>
+            <h2>Stopping Distance Calculator</h2><p class="calculator-description">Calculate braking distance and total stopping distance from initial speed, reaction time and braking deceleration.</p>
+            <div class="calculator-grid"><label>Initial Speed (km/h)<input id="stopSpeed" type="number" min="0" step="1" value="100"></label><label>Reaction Time (s)<input id="stopReaction" type="number" min="0" step="0.1" value="0.50"></label><label>Braking Deceleration (g)<input id="stopDecel" type="number" min="0.01" step="0.01" value="1.00"></label></div>
+            <button id="calculateStoppingButton" type="button">Calculate</button><div class="calculator-results calculator-results-3"><div class="result-card"><span>Reaction Distance (m)</span><strong id="stopReactionDistance">—</strong></div><div class="result-card"><span>Braking Distance (m)</span><strong id="stopBrakingDistance">—</strong></div><div class="result-card"><span>Total Stopping Distance (m)</span><strong id="stopTotalDistance">—</strong></div></div><p id="stopError" class="calculator-error" aria-live="polite"></p>
+        </section>
+
+        <section class="calculator-section" aria-label="Cornering speed calculator">
+            <h2>Cornering Speed Calculator</h2>
+            <p class="calculator-description">Estimate theoretical maximum cornering speed from corner radius and available tyre-road friction.</p>
             <div class="calculator-grid">
-                <label>Initial Speed (km/h)<input id="stopSpeed" type="number" min="0" step="1" value="100"></label>
-                <label>Reaction Time (s)<input id="stopReaction" type="number" min="0" step="0.1" value="0.50"></label>
-                <label>Braking Deceleration (g)<input id="stopDecel" type="number" min="0.01" step="0.01" value="1.00"></label>
+                <label>Corner Radius (m)<input id="cornerRadius" type="number" min="0.01" step="0.1" value="20"></label>
+                <label>Friction Coefficient μ (-)<input id="cornerMu" type="number" min="0.01" step="0.01" value="1.20"></label>
             </div>
-            <button id="calculateStoppingButton" type="button">Calculate</button>
+            <button id="calculateCornerButton" type="button">Calculate</button>
             <div class="calculator-results calculator-results-3">
-                <div class="result-card"><span>Reaction Distance (m)</span><strong id="stopReactionDistance">—</strong></div>
-                <div class="result-card"><span>Braking Distance (m)</span><strong id="stopBrakingDistance">—</strong></div>
-                <div class="result-card"><span>Total Stopping Distance (m)</span><strong id="stopTotalDistance">—</strong></div>
+                <div class="result-card"><span>Cornering Speed (m/s)</span><strong id="cornerSpeedMs">—</strong></div>
+                <div class="result-card"><span>Cornering Speed (km/h)</span><strong id="cornerSpeedKmh">—</strong></div>
+                <div class="result-card"><span>Lateral Acceleration (g)</span><strong id="cornerLateralG">—</strong></div>
             </div>
-            <p id="stopError" class="calculator-error" aria-live="polite"></p>
+            <p id="cornerError" class="calculator-error" aria-live="polite"></p>
         </section>
 
         <section class="calculator-section" aria-label="Inflation layer calculator">
