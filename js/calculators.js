@@ -111,3 +111,10 @@ export function calculateCorneringSpeed({ radius, frictionCoefficient }) {
     const speedMs = Math.sqrt(frictionCoefficient * g * radius);
     return { speedMs, speedKmh: speedMs * 3.6, lateralG: frictionCoefficient };
 }
+
+export function calculateLateralG({ speedKmh, radius }) {
+    if (![speedKmh, radius].every(Number.isFinite) || speedKmh < 0 || radius <= 0) return null;
+    const speedMs = speedKmh / 3.6;
+    const lateralAcceleration = (speedMs * speedMs) / radius;
+    return { speedMs, lateralAcceleration, lateralG: lateralAcceleration / 9.81 };
+}
