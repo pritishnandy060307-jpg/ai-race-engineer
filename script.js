@@ -1,6 +1,6 @@
 import { raceState, resetRaceState } from "./js/state.js";
 import { generateTelemetry } from "./js/telemetry.js";
-import { calculateVehicleSpeed, calculateInflationLayer, calculateInletTurbulence, calculateParticleSettling, calculateHumidity, calculateBrakeBias, calculateStoppingDistance, calculateCorneringSpeed, calculateLateralG } from "./js/calculators.js";
+import { calculateVehicleSpeed, calculateInflationLayer, calculateInletTurbulence, calculateParticleSettling, calculateHumidity, calculateBrakeBias, calculateStoppingDistance, calculateCorneringSpeed, calculateLateralG, calculateDownforce } from "./js/calculators.js";
 import { updateTelemetryUI, updateSessionUI, setSessionStatus, resetSessionUI } from "./js/ui.js";
 
 const button = document.querySelector("#sessionButton");
@@ -14,6 +14,7 @@ const calculateBrakeBiasButton = document.querySelector("#calculateBrakeBiasButt
 const calculateStoppingButton = document.querySelector("#calculateStoppingButton");
 const calculateCornerButton = document.querySelector("#calculateCornerButton");
 const calculateLateralGButton = document.querySelector("#calculateLateralGButton");
+const calculateDownforceButton = document.querySelector("#calculateDownforceButton");
 
 let sessionTimer = null;
 let telemetryTimer = null;
@@ -33,6 +34,7 @@ calculateBrakeBiasButton?.addEventListener("click", calculateBrakeBiasTool);
 calculateStoppingButton?.addEventListener("click", calculateStoppingTool);
 calculateCornerButton?.addEventListener("click", calculateCorneringTool);
 calculateLateralGButton?.addEventListener("click", calculateLateralGTool);
+calculateDownforceButton?.addEventListener("click", calculateDownforceTool);
 
 function value(id) { const element = document.querySelector(`#${id}`); return element ? Number.parseFloat(element.value) : NaN; }
 function show(id, text) { const element = document.querySelector(`#${id}`); if (element) element.textContent = text; }
@@ -46,6 +48,7 @@ function calculateBrakeBiasTool() { const result = calculateBrakeBias({ mass: va
 function calculateStoppingTool() { const result = calculateStoppingDistance({ speedKmh: value("stopSpeed"), reactionTime: value("stopReaction"), decelerationG: value("stopDecel") }); if (!result) { show("stopError", "Enter valid speed, reaction time and positive braking deceleration."); return; } show("stopError", ""); show("stopReactionDistance", `${result.reactionDistance.toFixed(2)} m`); show("stopBrakingDistance", `${result.brakingDistance.toFixed(2)} m`); show("stopTotalDistance", `${result.totalDistance.toFixed(2)} m`); }
 function calculateCorneringTool() { const result = calculateCorneringSpeed({ radius: value("cornerRadius"), frictionCoefficient: value("cornerMu") }); if (!result) { show("cornerError", "Enter a positive corner radius and friction coefficient."); return; } show("cornerError", ""); show("cornerSpeedMs", `${result.speedMs.toFixed(2)} m/s`); show("cornerSpeedKmh", `${result.speedKmh.toFixed(2)} km/h`); show("cornerLateralG", `${result.lateralG.toFixed(2)} g`); }
 function calculateLateralGTool() { const result = calculateLateralG({ speedKmh: value("lateralSpeed"), radius: value("lateralRadius") }); if (!result) { show("lateralError", "Enter a valid speed and positive corner radius."); return; } show("lateralError", ""); show("lateralSpeedMs", `${result.speedMs.toFixed(2)} m/s`); show("lateralAccel", `${result.lateralAcceleration.toFixed(2)} m/s²`); show("lateralG", `${result.lateralG.toFixed(2)} g`); }
+function calculateDownforceTool() { const result = calculateDownforce({ speedKmh: value("downforceSpeed"), airDensity: value("downforceDensity"), liftCoefficient: value("downforceCl"), referenceArea: value("downforceArea") }); if (!result) { show("downforceError", "Enter valid speed, density, C_L and reference area."); return; } show("downforceError", ""); show("downforceN", `${result.downforceN.toFixed(2)} N`); show("downforceKgf", `${result.downforceKgf.toFixed(2)} kgf`); show("downforceQ", `${result.dynamicPressure.toFixed(2)} Pa`); }
 
 function toggleSession() { if (raceState.session.active) endSession(); else startSession(); }
 function startSession() { resetRaceState(); raceState.session.active = true; raceState.session.status = "SESSION ACTIVE"; clearChartHistory(); resetSessionUI(); setSessionStatus(true); sessionTimer = setInterval(tickSession, 100); telemetryTimer = setInterval(updateTelemetry, 500); }
