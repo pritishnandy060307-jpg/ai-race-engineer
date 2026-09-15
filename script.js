@@ -35,6 +35,7 @@ calculateStoppingButton?.addEventListener("click", calculateStoppingTool);
 calculateCornerButton?.addEventListener("click", calculateCorneringTool);
 calculateLateralGButton?.addEventListener("click", calculateLateralGTool);
 calculateDownforceButton?.addEventListener("click", calculateDownforceTool);
+initializeToolNavigation();
 
 function value(id) { const element = document.querySelector(`#${id}`); return element ? Number.parseFloat(element.value) : NaN; }
 function show(id, text) { const element = document.querySelector(`#${id}`); if (element) element.textContent = text; }
@@ -49,6 +50,57 @@ function calculateStoppingTool() { const result = calculateStoppingDistance({ sp
 function calculateCorneringTool() { const result = calculateCorneringSpeed({ radius: value("cornerRadius"), frictionCoefficient: value("cornerMu") }); if (!result) { show("cornerError", "Enter a positive corner radius and friction coefficient."); return; } show("cornerError", ""); show("cornerSpeedMs", `${result.speedMs.toFixed(2)} m/s`); show("cornerSpeedKmh", `${result.speedKmh.toFixed(2)} km/h`); show("cornerLateralG", `${result.lateralG.toFixed(2)} g`); }
 function calculateLateralGTool() { const result = calculateLateralG({ speedKmh: value("lateralSpeed"), radius: value("lateralRadius") }); if (!result) { show("lateralError", "Enter a valid speed and positive corner radius."); return; } show("lateralError", ""); show("lateralSpeedMs", `${result.speedMs.toFixed(2)} m/s`); show("lateralAccel", `${result.lateralAcceleration.toFixed(2)} m/s²`); show("lateralG", `${result.lateralG.toFixed(2)} g`); }
 function calculateDownforceTool() { const result = calculateDownforce({ speedKmh: value("downforceSpeed"), airDensity: value("downforceDensity"), liftCoefficient: value("downforceCl"), referenceArea: value("downforceArea") }); if (!result) { show("downforceError", "Enter valid speed, density, C_L and reference area."); return; } show("downforceError", ""); show("downforceN", `${result.downforceN.toFixed(2)} N`); show("downforceKgf", `${result.downforceKgf.toFixed(2)} kgf`); show("downforceQ", `${result.dynamicPressure.toFixed(2)} Pa`); }
+
+function initializeToolNavigation() {
+    const container = document.querySelector(".container");
+    const header = container?.querySelector("header");
+    if (!container || !header) return;
+    const nav = document.createElement("nav");
+    nav.className = "tool-navigation";
+    nav.setAttribute("aria-label", "Race engineer sections");
+    const categories = [["dashboard", "🏁 Dashboard"], ["vehicle", "🚗 Vehicle Dynamics"], ["brakes", "🛞 Brakes & Tyres"], ["aero", "🌬️ Aerodynamics"], ["powertrain", "🔧 Powertrain"], ["fluid", "💧 Fluid & CFD"], ["performance", "📊 Performance"], ["suspension", "🔩 Suspension"]];
+    categories.forEach(([key, label], index) => {
+        const item = document.createElement("button");
+        item.type = "button";
+        item.className = "tool-nav-button";
+        item.dataset.category = key;
+        item.textContent = label;
+        item.addEventListener("click", () => selectToolCategory(key, nav));
+        nav.appendChild(item);
+        if (index === 0) item.classList.add("active");
+    });
+    header.insertAdjacentElement("afterend", nav);
+    injectNavigationStyles();
+    classifyCalculatorSections();
+    selectToolCategory("dashboard", nav);
+}
+
+function classifyCalculatorSections() {
+    const categoryByTitle = { "Gear Ratio Calculator":"powertrain", "Brake Bias Calculator":"brakes", "Stopping Distance Calculator":"vehicle", "Cornering Speed Calculator":"vehicle", "Lateral G Calculator":"vehicle", "Downforce Calculator":"aero", "Inflation Layer Calculator":"aero", "Inlet Turbulence Conditions Calculator":"aero", "Particle Settling Velocity Calculator":"fluid", "Humidity Calculator":"fluid", "Lap Time Calculator":"performance", "Delta Calculator":"performance", "Fuel Consumption Calculator":"powertrain", "Tyre Temperature Calculator":"brakes", "Spring Rate Calculator":"suspension", "Wheel Rate Calculator":"suspension", "Ride Frequency Calculator":"suspension", "Damper Calculator":"suspension", "Roll Stiffness Calculator":"suspension", "CG Height Calculator":"suspension", "Weight Distribution Calculator":"suspension", "Weight Transfer Calculator":"vehicle", "Tyre Load Transfer Calculator":"brakes", "Power-to-Weight Calculator":"powertrain", "Acceleration Calculator":"performance", "Drag Calculator":"aero", "Aero Balance Calculator":"aero" };
+    document.querySelectorAll(".calculator-section").forEach(section => { const title = section.querySelector("h2")?.textContent.trim(); section.dataset.category = categoryByTitle[title] || "vehicle"; });
+}
+
+function selectToolCategory(category, nav) {
+    nav.querySelectorAll(".tool-nav-button").forEach(item => item.classList.toggle("active", item.dataset.category === category));
+    const cards = document.querySelector(".cards");
+    const telemetry = document.querySelector(".telemetry-section");
+    const calculatorSections = document.querySelectorAll(".calculator-section");
+    const isDashboard = category === "dashboard";
+    if (cards) cards.hidden = !isDashboard;
+    if (telemetry) telemetry.hidden = !isDashboard;
+    calculatorSections.forEach(section => { section.hidden = isDashboard || section.dataset.category !== category; });
+    const firstVisible = !isDashboard ? document.querySelector(`.calculator-section[data-category="${category}"]`) : null;
+    if (firstVisible) firstVisible.scrollIntoView({ behavior: "smooth", block: "start" });
+    if (isDashboard) window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+function injectNavigationStyles() {
+    if (document.querySelector("#toolNavigationStyles")) return;
+    const style = document.createElement("style");
+    style.id = "toolNavigationStyles";
+    style.textContent = `.tool-navigation{display:flex;flex-wrap:wrap;gap:10px;margin:0 0 28px;padding:12px;background:#11151a;border:1px solid #303640;border-radius:10px}.tool-nav-button{margin:0!important;padding:10px 14px;border-radius:7px;background:#1d2128;color:#d1d5db;font-size:14px}.tool-nav-button:hover{background:#2a3038}.tool-nav-button.active{background:#ff6a00;color:#fff}.calculator-section[hidden],.cards[hidden],.telemetry-section[hidden]{display:none}@media(max-width:700px){.tool-navigation{display:grid;grid-template-columns:1fr 1fr}.tool-nav-button{width:100%}}`;
+    document.head.appendChild(style);
+}
 
 function toggleSession() { if (raceState.session.active) endSession(); else startSession(); }
 function startSession() { resetRaceState(); raceState.session.active = true; raceState.session.status = "SESSION ACTIVE"; clearChartHistory(); resetSessionUI(); setSessionStatus(true); sessionTimer = setInterval(tickSession, 100); telemetryTimer = setInterval(updateTelemetry, 500); }
