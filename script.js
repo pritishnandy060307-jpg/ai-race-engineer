@@ -1,6 +1,14 @@
 import { raceState, resetRaceState } from "./js/state.js";
 import { generateTelemetry } from "./js/telemetry.js";
-import { calculateVehicleSpeed, calculateInflationLayer, calculateInletTurbulence, calculateParticleSettling, calculateHumidity, calculateBrakeBias } from "./js/calculators.js";
+import {
+    calculateVehicleSpeed,
+    calculateInflationLayer,
+    calculateInletTurbulence,
+    calculateParticleSettling,
+    calculateHumidity,
+    calculateBrakeBias,
+    calculateStoppingDistance
+} from "./js/calculators.js";
 import { updateTelemetryUI, updateSessionUI, setSessionStatus, resetSessionUI } from "./js/ui.js";
 
 const button = document.querySelector("#sessionButton");
@@ -11,6 +19,7 @@ const calculateTurbulenceButton = document.querySelector("#calculateTurbulenceBu
 const calculateParticleButton = document.querySelector("#calculateParticleButton");
 const calculateHumidityButton = document.querySelector("#calculateHumidityButton");
 const calculateBrakeBiasButton = document.querySelector("#calculateBrakeBiasButton");
+const calculateStoppingButton = document.querySelector("#calculateStoppingButton");
 
 let sessionTimer = null;
 let telemetryTimer = null;
@@ -29,6 +38,7 @@ calculateTurbulenceButton?.addEventListener("click", calculateTurbulence);
 calculateParticleButton?.addEventListener("click", calculateParticle);
 calculateHumidityButton?.addEventListener("click", calculateHumidityTool);
 calculateBrakeBiasButton?.addEventListener("click", calculateBrakeBiasTool);
+calculateStoppingButton?.addEventListener("click", calculateStoppingTool);
 
 function value(id) { const element = document.querySelector(`#${id}`); return element ? Number.parseFloat(element.value) : NaN; }
 function show(id, text) { const element = document.querySelector(`#${id}`); if (element) element.textContent = text; }
@@ -71,11 +81,13 @@ function calculateHumidityTool() {
 function calculateBrakeBiasTool() {
     const result = calculateBrakeBias({ mass: value("brakeMass"), cgHeight: value("brakeCgHeight"), wheelbase: value("brakeWheelbase"), staticFrontPercent: value("brakeFrontPercent"), decelerationG: value("brakeDecelG") });
     if (!result) { show("brakeError", "Enter valid values. Rear axle load must remain positive during braking."); return; }
-    show("brakeError", "");
-    show("brakeFrontBias", `${result.frontBiasPercent.toFixed(2)}%`);
-    show("brakeRearBias", `${result.rearBiasPercent.toFixed(2)}%`);
-    show("brakeLoadTransfer", `${result.loadTransfer.toFixed(1)} N`);
-    show("brakeTotalForce", `${result.totalBrakingForce.toFixed(1)} N`);
+    show("brakeError", ""); show("brakeFrontBias", `${result.frontBiasPercent.toFixed(2)}%`); show("brakeRearBias", `${result.rearBiasPercent.toFixed(2)}%`); show("brakeLoadTransfer", `${result.loadTransfer.toFixed(1)} N`); show("brakeTotalForce", `${result.totalBrakingForce.toFixed(1)} N`);
+}
+
+function calculateStoppingTool() {
+    const result = calculateStoppingDistance({ speedKmh: value("stopSpeed"), reactionTime: value("stopReaction"), decelerationG: value("stopDecel") });
+    if (!result) { show("stopError", "Enter valid speed, reaction time and positive braking deceleration."); return; }
+    show("stopError", ""); show("stopReactionDistance", `${result.reactionDistance.toFixed(2)} m`); show("stopBrakingDistance", `${result.brakingDistance.toFixed(2)} m`); show("stopTotalDistance", `${result.totalDistance.toFixed(2)} m`);
 }
 
 function toggleSession() { if (raceState.session.active) endSession(); else startSession(); }
