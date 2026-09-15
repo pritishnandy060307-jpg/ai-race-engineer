@@ -7,7 +7,8 @@ import {
     calculateParticleSettling,
     calculateHumidity,
     calculateBrakeBias,
-    calculateStoppingDistance
+    calculateStoppingDistance,
+    calculateCorneringSpeed
 } from "./js/calculators.js";
 import { updateTelemetryUI, updateSessionUI, setSessionStatus, resetSessionUI } from "./js/ui.js";
 
@@ -20,6 +21,7 @@ const calculateParticleButton = document.querySelector("#calculateParticleButton
 const calculateHumidityButton = document.querySelector("#calculateHumidityButton");
 const calculateBrakeBiasButton = document.querySelector("#calculateBrakeBiasButton");
 const calculateStoppingButton = document.querySelector("#calculateStoppingButton");
+const calculateCornerButton = document.querySelector("#calculateCornerButton");
 
 let sessionTimer = null;
 let telemetryTimer = null;
@@ -39,6 +41,7 @@ calculateParticleButton?.addEventListener("click", calculateParticle);
 calculateHumidityButton?.addEventListener("click", calculateHumidityTool);
 calculateBrakeBiasButton?.addEventListener("click", calculateBrakeBiasTool);
 calculateStoppingButton?.addEventListener("click", calculateStoppingTool);
+calculateCornerButton?.addEventListener("click", calculateCorneringTool);
 
 function value(id) { const element = document.querySelector(`#${id}`); return element ? Number.parseFloat(element.value) : NaN; }
 function show(id, text) { const element = document.querySelector(`#${id}`); if (element) element.textContent = text; }
@@ -88,6 +91,15 @@ function calculateStoppingTool() {
     const result = calculateStoppingDistance({ speedKmh: value("stopSpeed"), reactionTime: value("stopReaction"), decelerationG: value("stopDecel") });
     if (!result) { show("stopError", "Enter valid speed, reaction time and positive braking deceleration."); return; }
     show("stopError", ""); show("stopReactionDistance", `${result.reactionDistance.toFixed(2)} m`); show("stopBrakingDistance", `${result.brakingDistance.toFixed(2)} m`); show("stopTotalDistance", `${result.totalDistance.toFixed(2)} m`);
+}
+
+function calculateCorneringTool() {
+    const result = calculateCorneringSpeed({ radius: value("cornerRadius"), frictionCoefficient: value("cornerMu") });
+    if (!result) { show("cornerError", "Enter a positive corner radius and friction coefficient."); return; }
+    show("cornerError", "");
+    show("cornerSpeedMs", `${result.speedMs.toFixed(2)} m/s`);
+    show("cornerSpeedKmh", `${result.speedKmh.toFixed(2)} km/h`);
+    show("cornerLateralG", `${result.lateralG.toFixed(2)} g`);
 }
 
 function toggleSession() { if (raceState.session.active) endSession(); else startSession(); }
