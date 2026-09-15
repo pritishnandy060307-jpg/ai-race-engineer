@@ -47,6 +47,7 @@ function calculateLapDelta({ referenceLapSeconds, currentLapSeconds }) {
 }
 
 function addSection(section) {
+    section.dataset.category = "vehicle";
     document.querySelector("main")?.appendChild(section);
 }
 
@@ -56,28 +57,28 @@ function buildVehicleDynamicsTools() {
     const powerToWeight = document.createElement("section");
     powerToWeight.id = "powerToWeightSection";
     powerToWeight.className = "calculator-section";
-    powerToWeight.setAttribute("aria-label", "Power-to-weight calculator");
+    powerToWeight.setAttribute("aria-label", "Vehicle dynamics — Power-to-weight calculator");
     powerToWeight.innerHTML = `<h2>Power-to-Weight Calculator</h2><p class="calculator-description">Compare engine power with vehicle mass using kW/tonne, hp/tonne and W/kg.</p><div class="calculator-grid"><label>Vehicle Mass (kg)<input id="ptwMass" type="number" min="1" step="1" value="250"></label><label>Power (kW)<input id="ptwPower" type="number" min="0.1" step="1" value="60"></label></div><button id="calculatePowerToWeightButton" type="button">Calculate</button><div class="calculator-results calculator-results-3"><div class="result-card"><span>Power-to-Weight (kW/t)</span><strong id="ptwKwT">—</strong></div><div class="result-card"><span>Power-to-Weight (hp/t)</span><strong id="ptwHpT">—</strong></div><div class="result-card"><span>Specific Power (W/kg)</span><strong id="ptwWKg">—</strong></div></div><p id="ptwError" class="calculator-error" aria-live="polite"></p>`;
     addSection(powerToWeight);
 
     const acceleration = document.createElement("section");
     acceleration.id = "accelerationSection";
     acceleration.className = "calculator-section";
-    acceleration.setAttribute("aria-label", "Acceleration calculator");
+    acceleration.setAttribute("aria-label", "Vehicle dynamics — Acceleration calculator");
     acceleration.innerHTML = `<h2>Acceleration Calculator</h2><p class="calculator-description">Estimate instantaneous longitudinal acceleration from available power, aerodynamic drag and rolling resistance.</p><div class="calculator-grid"><label>Vehicle Mass (kg)<input id="accMass" type="number" min="1" step="1" value="250"></label><label>Power (kW)<input id="accPower" type="number" min="0.1" step="1" value="60"></label><label>Vehicle Speed (km/h)<input id="accSpeed" type="number" min="0.1" step="1" value="100"></label><label>Drivetrain Efficiency (%)<input id="accEfficiency" type="number" min="1" max="100" step="1" value="90"></label><label>Drag Coefficient C<sub>D</sub><input id="accCd" type="number" min="0" step="0.01" value="0.80"></label><label>Frontal Area (m²)<input id="accArea" type="number" min="0.01" step="0.01" value="1.20"></label><label>Rolling Resistance Coefficient<input id="accCr" type="number" min="0" step="0.001" value="0.015"></label></div><button id="calculateAccelerationButton" type="button">Calculate</button><div class="calculator-results calculator-results-4"><div class="result-card"><span>Drive Force</span><strong id="accDriveForce">—</strong></div><div class="result-card"><span>Drag Force</span><strong id="accDragForce">—</strong></div><div class="result-card"><span>Rolling Force</span><strong id="accRollingForce">—</strong></div><div class="result-card"><span>Acceleration</span><strong id="accAcceleration">—</strong></div></div><p id="accError" class="calculator-error" aria-live="polite"></p>`;
     addSection(acceleration);
 
     const lapTime = document.createElement("section");
     lapTime.id = "lapTimeSection";
     lapTime.className = "calculator-section";
-    lapTime.setAttribute("aria-label", "Lap time calculator");
+    lapTime.setAttribute("aria-label", "Vehicle dynamics — Lap time calculator");
     lapTime.innerHTML = `<h2>Lap Time Calculator</h2><p class="calculator-description">Estimate lap time from circuit distance and average vehicle speed.</p><div class="calculator-grid"><label>Track Length (km)<input id="lapDistance" type="number" min="0.01" step="0.01" value="3.00"></label><label>Average Speed (km/h)<input id="lapAverageSpeed" type="number" min="0.1" step="1" value="90"></label></div><button id="calculateLapTimeButton" type="button">Calculate</button><div class="calculator-results calculator-results-2"><div class="result-card"><span>Lap Time</span><strong id="lapTimeResult">—</strong></div><div class="result-card"><span>Total Time (s)</span><strong id="lapTimeSeconds">—</strong></div></div><p id="lapTimeError" class="calculator-error" aria-live="polite"></p>`;
     addSection(lapTime);
 
     const lapDelta = document.createElement("section");
     lapDelta.id = "lapDeltaSection";
     lapDelta.className = "calculator-section";
-    lapDelta.setAttribute("aria-label", "Lap delta calculator");
+    lapDelta.setAttribute("aria-label", "Vehicle dynamics — Lap delta calculator");
     lapDelta.innerHTML = `<h2>Lap Delta Calculator</h2><p class="calculator-description">Compare a current lap against a reference lap. Positive delta means the current lap is slower; negative means it is faster.</p><div class="calculator-grid"><label>Reference Lap (s)<input id="deltaReference" type="number" min="0.001" step="0.001" value="90.000"></label><label>Current Lap (s)<input id="deltaCurrent" type="number" min="0.001" step="0.001" value="91.250"></label></div><button id="calculateLapDeltaButton" type="button">Calculate</button><div class="calculator-results calculator-results-2"><div class="result-card"><span>Delta</span><strong id="deltaResult">—</strong></div><div class="result-card"><span>Delta (%)</span><strong id="deltaPercent">—</strong></div></div><p id="deltaError" class="calculator-error" aria-live="polite"></p>`;
     addSection(lapDelta);
 
