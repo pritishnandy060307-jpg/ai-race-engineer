@@ -93,14 +93,14 @@ export function calculateBrakeBias({ mass, cgHeight, wheelbase, staticFrontPerce
     const rearLoad = staticRearLoad - loadTransfer;
     if (rearLoad <= 0) return null;
     const frontBiasPercent = frontLoad / weight * 100;
-    return {
-        staticFrontLoad,
-        staticRearLoad,
-        loadTransfer,
-        frontLoad,
-        rearLoad,
-        frontBiasPercent,
-        rearBiasPercent: 100 - frontBiasPercent,
-        totalBrakingForce: mass * decelerationG * g
-    };
+    return { staticFrontLoad, staticRearLoad, loadTransfer, frontLoad, rearLoad, frontBiasPercent, rearBiasPercent: 100 - frontBiasPercent, totalBrakingForce: mass * decelerationG * g };
+}
+
+export function calculateStoppingDistance({ speedKmh, reactionTime, decelerationG }) {
+    if (![speedKmh, reactionTime, decelerationG].every(Number.isFinite) || speedKmh < 0 || reactionTime < 0 || decelerationG <= 0) return null;
+    const g = 9.81;
+    const speedMs = speedKmh / 3.6;
+    const reactionDistance = speedMs * reactionTime;
+    const brakingDistance = speedMs * speedMs / (2 * decelerationG * g);
+    return { speedMs, reactionDistance, brakingDistance, totalDistance: reactionDistance + brakingDistance };
 }
