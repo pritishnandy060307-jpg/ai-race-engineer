@@ -19,28 +19,30 @@
         <section class="calculator-section" aria-label="Gear ratio calculator">
             <h2>Gear Ratio Calculator</h2><p class="calculator-description">Calculate wheel RPM and theoretical vehicle speed from engine RPM, gearing and tyre diameter.</p>
             <div class="calculator-grid"><label>Engine RPM<input id="engineRpmInput" type="number" min="0" step="100" value="8000"></label><label>Gear Ratio<input id="gearRatioInput" type="number" min="0.01" step="0.01" value="2.00"></label><label>Final Drive Ratio<input id="finalDriveInput" type="number" min="0.01" step="0.01" value="3.50"></label><label>Tyre Diameter (m)<input id="tyreDiameterInput" type="number" min="0.01" step="0.001" value="0.50"></label></div>
-            <button id="calculateGearButton" type="button">Calculate</button>
-            <div class="calculator-results"><div class="result-card"><span>Wheel RPM</span><strong id="wheelRpmResult">—</strong></div><div class="result-card"><span>Vehicle Speed</span><strong id="vehicleSpeedResult">—</strong></div></div><p id="calculatorError" class="calculator-error" aria-live="polite"></p>
+            <button id="calculateGearButton" type="button">Calculate</button><div class="calculator-results"><div class="result-card"><span>Wheel RPM</span><strong id="wheelRpmResult">—</strong></div><div class="result-card"><span>Vehicle Speed</span><strong id="vehicleSpeedResult">—</strong></div></div><p id="calculatorError" class="calculator-error" aria-live="polite"></p>
         </section>
 
         <section class="calculator-section" aria-label="Brake bias calculator">
-            <h2>Brake Bias Calculator</h2>
-            <p class="calculator-description">Estimate ideal front/rear braking-force distribution from static weight distribution and longitudinal load transfer during braking.</p>
+            <h2>Brake Bias Calculator</h2><p class="calculator-description">Estimate ideal front/rear braking-force distribution from static weight distribution and longitudinal load transfer during braking.</p>
+            <div class="calculator-grid"><label>Vehicle Mass (kg)<input id="brakeMass" type="number" min="1" step="1" value="250"></label><label>CG Height (m)<input id="brakeCgHeight" type="number" min="0.001" step="0.001" value="0.30"></label><label>Wheelbase (m)<input id="brakeWheelbase" type="number" min="0.01" step="0.01" value="1.60"></label><label>Static Front Weight (%)<input id="brakeFrontPercent" type="number" min="0.1" max="99.9" step="0.1" value="45"></label><label>Braking Deceleration (g)<input id="brakeDecelG" type="number" min="0.01" step="0.01" value="1.20"></label></div>
+            <button id="calculateBrakeBiasButton" type="button">Calculate</button><div class="calculator-results calculator-results-4"><div class="result-card"><span>Front Brake Bias</span><strong id="brakeFrontBias">—</strong></div><div class="result-card"><span>Rear Brake Bias</span><strong id="brakeRearBias">—</strong></div><div class="result-card"><span>Load Transfer (N)</span><strong id="brakeLoadTransfer">—</strong></div><div class="result-card"><span>Total Braking Force (N)</span><strong id="brakeTotalForce">—</strong></div></div><p id="brakeError" class="calculator-error" aria-live="polite"></p>
+        </section>
+
+        <section class="calculator-section" aria-label="Stopping distance calculator">
+            <h2>Stopping Distance Calculator</h2>
+            <p class="calculator-description">Calculate braking distance and total stopping distance from initial speed, reaction time and braking deceleration.</p>
             <div class="calculator-grid">
-                <label>Vehicle Mass (kg)<input id="brakeMass" type="number" min="1" step="1" value="250"></label>
-                <label>CG Height (m)<input id="brakeCgHeight" type="number" min="0.001" step="0.001" value="0.30"></label>
-                <label>Wheelbase (m)<input id="brakeWheelbase" type="number" min="0.01" step="0.01" value="1.60"></label>
-                <label>Static Front Weight (%)<input id="brakeFrontPercent" type="number" min="0.1" max="99.9" step="0.1" value="45"></label>
-                <label>Braking Deceleration (g)<input id="brakeDecelG" type="number" min="0.01" step="0.01" value="1.20"></label>
+                <label>Initial Speed (km/h)<input id="stopSpeed" type="number" min="0" step="1" value="100"></label>
+                <label>Reaction Time (s)<input id="stopReaction" type="number" min="0" step="0.1" value="0.50"></label>
+                <label>Braking Deceleration (g)<input id="stopDecel" type="number" min="0.01" step="0.01" value="1.00"></label>
             </div>
-            <button id="calculateBrakeBiasButton" type="button">Calculate</button>
-            <div class="calculator-results calculator-results-4">
-                <div class="result-card"><span>Front Brake Bias</span><strong id="brakeFrontBias">—</strong></div>
-                <div class="result-card"><span>Rear Brake Bias</span><strong id="brakeRearBias">—</strong></div>
-                <div class="result-card"><span>Load Transfer (N)</span><strong id="brakeLoadTransfer">—</strong></div>
-                <div class="result-card"><span>Total Braking Force (N)</span><strong id="brakeTotalForce">—</strong></div>
+            <button id="calculateStoppingButton" type="button">Calculate</button>
+            <div class="calculator-results calculator-results-3">
+                <div class="result-card"><span>Reaction Distance (m)</span><strong id="stopReactionDistance">—</strong></div>
+                <div class="result-card"><span>Braking Distance (m)</span><strong id="stopBrakingDistance">—</strong></div>
+                <div class="result-card"><span>Total Stopping Distance (m)</span><strong id="stopTotalDistance">—</strong></div>
             </div>
-            <p id="brakeError" class="calculator-error" aria-live="polite"></p>
+            <p id="stopError" class="calculator-error" aria-live="polite"></p>
         </section>
 
         <section class="calculator-section" aria-label="Inflation layer calculator">
