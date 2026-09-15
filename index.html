@@ -27,62 +27,108 @@
 
         <section class="telemetry-section">
             <h2>Speed Telemetry</h2>
-            <div class="chart-container">
-                <canvas id="speedChart"></canvas>
-            </div>
+            <div class="chart-container"><canvas id="speedChart"></canvas></div>
         </section>
 
         <section class="calculator-section" aria-label="Gear ratio calculator">
             <h2>Gear Ratio Calculator</h2>
-            <p class="calculator-description">Calculate wheel RPM and vehicle speed from engine RPM, gearing and tyre diameter.</p>
-
+            <p class="calculator-description">Calculate wheel RPM and theoretical vehicle speed from engine RPM, gearing and tyre diameter.</p>
             <div class="calculator-grid">
-                <label>
-                    Engine RPM
-                    <input id="engineRpmInput" type="number" min="0" step="100" value="8000">
-                </label>
-                <label>
-                    Gear Ratio
-                    <input id="gearRatioInput" type="number" min="0.01" step="0.01" value="2.00">
-                </label>
-                <label>
-                    Final Drive Ratio
-                    <input id="finalDriveInput" type="number" min="0.01" step="0.01" value="3.50">
-                </label>
-                <label>
-                    Tyre Diameter (m)
-                    <input id="tyreDiameterInput" type="number" min="0.01" step="0.001" value="0.50">
-                </label>
+                <label>Engine RPM<input id="engineRpmInput" type="number" min="0" step="100" value="8000"></label>
+                <label>Gear Ratio<input id="gearRatioInput" type="number" min="0.01" step="0.01" value="2.00"></label>
+                <label>Final Drive Ratio<input id="finalDriveInput" type="number" min="0.01" step="0.01" value="3.50"></label>
+                <label>Tyre Diameter (m)<input id="tyreDiameterInput" type="number" min="0.01" step="0.001" value="0.50"></label>
             </div>
-
             <button id="calculateGearButton" type="button">Calculate</button>
-
             <div class="calculator-results">
-                <div class="result-card">
-                    <span>Wheel RPM</span>
-                    <strong id="wheelRpmResult">—</strong>
-                </div>
-                <div class="result-card">
-                    <span>Vehicle Speed</span>
-                    <strong id="vehicleSpeedResult">—</strong>
-                </div>
+                <div class="result-card"><span>Wheel RPM</span><strong id="wheelRpmResult">—</strong></div>
+                <div class="result-card"><span>Vehicle Speed</span><strong id="vehicleSpeedResult">—</strong></div>
             </div>
             <p id="calculatorError" class="calculator-error" aria-live="polite"></p>
         </section>
 
-        <div class="status">
-            <span class="status-dot"></span>
-            <span id="sessionStatus">OFFLINE</span>
-        </div>
+        <section class="calculator-section" aria-label="Inflation layer calculator">
+            <h2>Inflation Layer Calculator</h2>
+            <p class="calculator-description">Estimate the first cell height, boundary-layer thickness and maximum growth ratio for an inflation-layer mesh.</p>
+            <div class="calculator-grid">
+                <label>Velocity (m/s)<input id="inflVelocity" type="number" min="0.001" step="0.1" value="10"></label>
+                <label>Length Scale (m)<input id="inflLength" type="number" min="0.001" step="0.1" value="1"></label>
+                <label>Viscosity (Pa·s)<input id="inflViscosity" type="number" min="1e-12" step="1e-7" value="1.81e-5"></label>
+                <label>Density (kg/m³)<input id="inflDensity" type="number" min="0.001" step="0.001" value="1.225"></label>
+                <label>Target y⁺<input id="inflYPlus" type="number" min="0.001" step="0.1" value="1"></label>
+                <label>Layers<input id="inflLayers" type="number" min="2" step="1" value="20"></label>
+            </div>
+            <button id="calculateInflationButton" type="button">Calculate</button>
+            <div class="calculator-results calculator-results-4">
+                <div class="result-card"><span>First Layer (m)</span><strong id="inflFirst">—</strong></div>
+                <div class="result-card"><span>Final Layer (m)</span><strong id="inflFinal">—</strong></div>
+                <div class="result-card"><span>δ₉₉ (m)</span><strong id="inflDelta">—</strong></div>
+                <div class="result-card"><span>Max. Growth Ratio</span><strong id="inflGrowth">—</strong></div>
+            </div>
+            <p id="inflError" class="calculator-error" aria-live="polite"></p>
+        </section>
 
-        <div class="timer">
-            <h2>Session Time</h2>
-            <p id="sessionTimer">00:00:00</p>
-        </div>
+        <section class="calculator-section" aria-label="Inlet turbulence conditions calculator">
+            <h2>Inlet Turbulence Conditions Calculator</h2>
+            <p class="calculator-description">Compute turbulent kinetic energy, dissipation rate, specific dissipation rate and turbulent kinematic viscosity from inlet conditions.</p>
+            <div class="calculator-grid">
+                <label>Velocity (m/s)<input id="turbVelocity" type="number" min="0.001" step="0.1" value="10"></label>
+                <label>Intensity (%)<input id="turbIntensity" type="number" min="0" max="100" step="0.1" value="5"></label>
+                <label>Length Scale (m)<input id="turbLength" type="number" min="0.000001" step="0.01" value="0.1"></label>
+            </div>
+            <button id="calculateTurbulenceButton" type="button">Calculate</button>
+            <div class="calculator-results calculator-results-4">
+                <div class="result-card"><span>k (m²/s²)</span><strong id="turbK">—</strong></div>
+                <div class="result-card"><span>ω (s⁻¹)</span><strong id="turbOmega">—</strong></div>
+                <div class="result-card"><span>ε (m²/s³)</span><strong id="turbEpsilon">—</strong></div>
+                <div class="result-card"><span>νₜ (m²/s)</span><strong id="turbNu">—</strong></div>
+            </div>
+            <p id="turbError" class="calculator-error" aria-live="polite"></p>
+        </section>
 
+        <section class="calculator-section" aria-label="Particle settling velocity calculator">
+            <h2>Particle Settling Velocity Calculator</h2>
+            <p class="calculator-description">Calculate terminal settling velocity using iterative drag correction with the Schiller–Naumann model.</p>
+            <div class="calculator-grid">
+                <label>Diameter (m)<input id="particleDiameter" type="number" min="1e-9" step="1e-6" value="0.0001"></label>
+                <label>Particle Density (kg/m³)<input id="particleDensity" type="number" min="0.001" step="1" value="1550"></label>
+                <label>Fluid
+                    <select id="particleFluid">
+                        <option value="water">Water</option>
+                        <option value="air">Air</option>
+                    </select>
+                </label>
+            </div>
+            <button id="calculateParticleButton" type="button">Calculate</button>
+            <div class="calculator-results calculator-results-3">
+                <div class="result-card"><span>Re</span><strong id="particleRe">—</strong></div>
+                <div class="result-card"><span>C<sub>D</sub></span><strong id="particleCd">—</strong></div>
+                <div class="result-card"><span>Velocity (m/s)</span><strong id="particleVelocity">—</strong></div>
+            </div>
+            <p id="particleError" class="calculator-error" aria-live="polite"></p>
+        </section>
+
+        <section class="calculator-section" aria-label="Humidity calculator">
+            <h2>Humidity Calculator</h2>
+            <p class="calculator-description">Compute specific humidity, absolute humidity and water-vapour mass fraction from temperature, pressure and relative humidity.</p>
+            <div class="calculator-grid">
+                <label>Temperature (°C)<input id="humidityTemp" type="number" step="0.1" value="25"></label>
+                <label>Pressure (Pa)<input id="humidityPressure" type="number" min="1" step="100" value="101325"></label>
+                <label>Relative Humidity (0–1)<input id="humidityRH" type="number" min="0" max="1" step="0.01" value="0.6"></label>
+            </div>
+            <button id="calculateHumidityButton" type="button">Calculate</button>
+            <div class="calculator-results calculator-results-3">
+                <div class="result-card"><span>Spec. Hum. (kg/kg)</span><strong id="humiditySpecific">—</strong></div>
+                <div class="result-card"><span>Abs. Hum. (kg/kg)</span><strong id="humidityAbsolute">—</strong></div>
+                <div class="result-card"><span>Mass Frac. (–)</span><strong id="humidityMassFraction">—</strong></div>
+            </div>
+            <p id="humidityError" class="calculator-error" aria-live="polite"></p>
+        </section>
+
+        <div class="status"><span class="status-dot"></span><span id="sessionStatus">OFFLINE</span></div>
+        <div class="timer"><h2>Session Time</h2><p id="sessionTimer">00:00:00</p></div>
         <button id="sessionButton" type="button">Start Session</button>
     </main>
-
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script type="module" src="script.js"></script>
 </body>
