@@ -141,3 +141,15 @@ export function calculateWeightTransfer({ mass, cgHeight, wheelbase, trackWidth,
     const outsideLoad = weight / 2 + lateralTransfer / 2;
     return { weight, longitudinalTransfer, lateralTransfer, frontLoad, rearLoad, insideLoad, outsideLoad };
 }
+
+// Hide dashboard-only session controls when a calculator category is selected.
+document.addEventListener("click", event => {
+    const navButton = event.target.closest(".nav-button");
+    if (!navButton) return;
+    const category = navButton.dataset.category;
+    const dashboardVisible = category === "all" || category === "dashboard";
+    ["#sessionButton", ".status", ".timer"].forEach(selector => {
+        const element = document.querySelector(selector);
+        if (element) element.hidden = !dashboardVisible;
+    });
+});
