@@ -118,3 +118,11 @@ export function calculateLateralG({ speedKmh, radius }) {
     const lateralAcceleration = (speedMs * speedMs) / radius;
     return { speedMs, lateralAcceleration, lateralG: lateralAcceleration / 9.81 };
 }
+
+export function calculateDownforce({ speedKmh, airDensity, liftCoefficient, referenceArea }) {
+    if (![speedKmh, airDensity, liftCoefficient, referenceArea].every(Number.isFinite) || speedKmh < 0 || airDensity <= 0 || liftCoefficient < 0 || referenceArea <= 0) return null;
+    const speedMs = speedKmh / 3.6;
+    const dynamicPressure = 0.5 * airDensity * speedMs * speedMs;
+    const downforceN = dynamicPressure * liftCoefficient * referenceArea;
+    return { speedMs, dynamicPressure, downforceN, downforceKgf: downforceN / 9.81 };
+}
