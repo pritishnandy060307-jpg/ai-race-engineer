@@ -32,6 +32,44 @@
             </div>
         </section>
 
+        <section class="calculator-section" aria-label="Gear ratio calculator">
+            <h2>Gear Ratio Calculator</h2>
+            <p class="calculator-description">Calculate wheel RPM and vehicle speed from engine RPM, gearing and tyre diameter.</p>
+
+            <div class="calculator-grid">
+                <label>
+                    Engine RPM
+                    <input id="engineRpmInput" type="number" min="0" step="100" value="8000">
+                </label>
+                <label>
+                    Gear Ratio
+                    <input id="gearRatioInput" type="number" min="0.01" step="0.01" value="2.00">
+                </label>
+                <label>
+                    Final Drive Ratio
+                    <input id="finalDriveInput" type="number" min="0.01" step="0.01" value="3.50">
+                </label>
+                <label>
+                    Tyre Diameter (m)
+                    <input id="tyreDiameterInput" type="number" min="0.01" step="0.001" value="0.50">
+                </label>
+            </div>
+
+            <button id="calculateGearButton" type="button">Calculate</button>
+
+            <div class="calculator-results">
+                <div class="result-card">
+                    <span>Wheel RPM</span>
+                    <strong id="wheelRpmResult">—</strong>
+                </div>
+                <div class="result-card">
+                    <span>Vehicle Speed</span>
+                    <strong id="vehicleSpeedResult">—</strong>
+                </div>
+            </div>
+            <p id="calculatorError" class="calculator-error" aria-live="polite"></p>
+        </section>
+
         <div class="status">
             <span class="status-dot"></span>
             <span id="sessionStatus">OFFLINE</span>
