@@ -80,8 +80,8 @@ function setupNavigation() {
 function categoryForSection(section) {
     const label = (section.getAttribute("aria-label") || "").toLowerCase();
     if (label.includes("gear ratio")) return "powertrain";
-    if (label.includes("brake bias")) return "brakes";
-    if (label.includes("stopping distance") || label.includes("cornering speed") || label.includes("lateral g") || label.includes("weight transfer")) return "vehicle";
+    if (label.includes("brake bias") || label.includes("tyre temperature")) return "brakes";
+    if (label.includes("stopping distance") || label.includes("cornering speed") || label.includes("lateral g") || label.includes("weight transfer") || label.includes("power-to-weight") || label.includes("acceleration") || label.includes("lap time") || label.includes("lap delta")) return "vehicle";
     if (label.includes("downforce") || label.includes("inflation layer") || label.includes("inlet turbulence")) return "aero";
     if (label.includes("particle settling") || label.includes("humidity")) return "fluid";
     return "dashboard";
@@ -99,8 +99,7 @@ setupNavigation();
 function toggleSession() { if (raceState.session.active) endSession(); else startSession(); }
 function startSession() { resetRaceState(); raceState.session.active = true; raceState.session.status = "SESSION ACTIVE"; clearChartHistory(); resetSessionUI(); setSessionStatus(true); sessionTimer = setInterval(tickSession, 100); telemetryTimer = setInterval(updateTelemetry, 500); }
 function endSession() { raceState.session.active = false; raceState.session.status = "OFFLINE"; clearInterval(sessionTimer); clearInterval(telemetryTimer); sessionTimer = null; telemetryTimer = null; setSessionStatus(false); }
-function tickSession() { raceState.session.elapsedSeconds = Number((raceState.session.elapsedSeconds + 0.1).toFixed(1)); raceState.lap.currentTimeSeconds = Number((raceState.lap.currentTimeSeconds + 0.1).toFixed(1)); if (raceState.lap.currentTimeSeconds >= raceState.lap.targetTimeSeconds) completeLap(); updateLapDelta(); updateSessionUI(raceState); }
-function completeLap() { const completedLapTime = raceState.lap.currentTimeSeconds; raceState.lap.completedTimes.push(completedLapTime); if (raceState.lap.bestTimeSeconds === null || completedLapTime < raceState.lap.bestTimeSeconds) raceState.lap.bestTimeSeconds = completedLapTime; raceState.lap.number++; raceState.lap.currentTimeSeconds = 0; const lapVariation = [0.0, -0.8, 1.2, -0.4, 0.6]; const variation = lapVariation[(raceState.lap.number - 1) % lapVariation.length]; raceState.lap.targetTimeSeconds = 20 + variation; }
-function updateLapDelta() { if (raceState.lap.bestTimeSeconds === null) { raceState.lap.deltaSeconds = null; return; } raceState.lap.deltaSeconds = Number((raceState.lap.currentTimeSeconds - raceState.lap.bestTimeSeconds).toFixed(1)); }
-function updateTelemetry() { const telemetry = generateTelemetry(raceState.session.elapsedSeconds); raceState.vehicle.speedKmh = telemetry.speed; raceState.vehicle.rpm = telemetry.rpm; raceState.vehicle.gear = telemetry.gear; raceState.vehicle.throttlePercent = telemetry.throttle; raceState.vehicle.brakePercent = telemetry.brake; raceState.telemetry.speed.push(telemetry.speed); raceState.telemetry.rpm.push(telemetry.rpm); raceState.telemetry.throttle.push(telemetry.throttle); raceState.telemetry.brake.push(telemetry.brake); raceState.telemetry.gear.push(telemetry.gear); raceState.telemetry.timestamps.push(raceState.session.elapsedSeconds); updateTelemetryUI(raceState.vehicle); chartData.labels.push(raceState.session.elapsedSeconds.toFixed(1)); chartData.speed.push(telemetry.speed); if (chartData.labels.length > 60) { chartData.labels.shift(); chartData.speed.shift(); } if (chart) chart.update(); }
-function clearChartHistory() { chartData.labels.length = 0; chartData.speed.length = 0; if (chart) chart.update(); }
+function tickSession() { raceState.session.elapsedSeconds = Number((raceState.session.elapsedSeconds + 0.1).toFixed(1)); updateSessionUI(raceState); }
+function updateTelemetry() { const telemetry = generateTelemetry(); raceState.telemetry = telemetry; updateTelemetryUI(telemetry); updateChart(telemetry); }
+function updateChart(telemetry) { if (!chart) return; const t = raceState.session.elapsedSeconds; chartData.labels.push(t.toFixed(1)); chartData.speed.push(telemetry.speedKmh); if (chartData.labels.length > 120) { chartData.labels.shift(); chartData.speed.shift(); } chart.update("none"); }
+function clearChartHistory() { chartData.labels.length = 0; chartData.speed.length = 0; chart?.update("none"); }
