@@ -1,4 +1,5 @@
 import "./lap-timing.js";
+import "./session-stats.js";
 
 export function generateTelemetry(sessionSeconds = performance.now() / 1000) {
     const t = sessionSeconds % 24;
