@@ -3,6 +3,21 @@ import "./suspension-tools.js?v=1";
 import "./fuel-consumption.js?v=1";
 import "./telemetry-charts.js?v=1";
 
+function moveSessionControls() {
+    const status = document.querySelector(".status");
+    const timer = document.querySelector(".timer");
+    const button = document.querySelector("#sessionButton");
+    const firstCalculator = document.querySelector(".calculator-section");
+
+    if (!status || !timer || !button || !firstCalculator || document.querySelector(".session-controls")) return;
+
+    const controls = document.createElement("section");
+    controls.className = "session-controls";
+    controls.setAttribute("aria-label", "Race session controls");
+    controls.append(status, timer, button);
+    firstCalculator.before(controls);
+}
+
 function showVehicleDynamics() {
     const vehicleIds = ["powerToWeightSection", "accelerationSection", "lapTimeSection", "lapDeltaSection", "weightTransferSection"];
     document.querySelectorAll(".calculator-section, .telemetry-section").forEach(section => {
@@ -33,6 +48,8 @@ function showCategory(category, titleText) {
         first.before(title);
     }
 }
+
+document.addEventListener("DOMContentLoaded", moveSessionControls);
 
 document.addEventListener("click", event => {
     const button = event.target.closest(".nav-button");
