@@ -1,6 +1,7 @@
 import "./tyre-temperature.js?v=1";
 import "./suspension-tools.js?v=1";
 import "./fuel-consumption.js?v=1";
+import "./telemetry-charts.js?v=1";
 
 function showVehicleDynamics() {
     const vehicleIds = ["powerToWeightSection", "accelerationSection", "lapTimeSection", "lapDeltaSection", "weightTransferSection"];
