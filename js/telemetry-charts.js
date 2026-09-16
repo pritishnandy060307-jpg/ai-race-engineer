@@ -20,6 +20,8 @@ function createChartCard(title, canvasId) {
 }
 
 function setupCharts() {
+    if (document.getElementById('rpmChart')) return null;
+
     const section = document.createElement('section');
     section.className = 'telemetry-section';
     section.innerHTML = '<h2>Live Telemetry Channels</h2>';
@@ -41,30 +43,38 @@ function setupCharts() {
         maintainAspectRatio: false,
         animation: false,
         scales: { y: { beginAtZero: true } },
-        plugins: { legend: { display: false } }
+        plugins: { legend: { display: true } }
     };
 
     const createLineChart = (id, label, data, max) => new Chart(document.getElementById(id), {
         type: 'line',
-        data: { labels: chartState.labels, datasets: [{ label, data, tension: 0.25, pointRadius: 0 }] },
-        options: { ...commonOptions, scales: { y: { beginAtZero: true, ...(max ? { max } : {}) } } }
+        data: {
+            labels: chartState.labels,
+            datasets: [{ label, data, borderWidth: 2, tension: 0.25, pointRadius: 0 }]
+        },
+        options: {
+            ...commonOptions,
+            scales: { y: { beginAtZero: true, ...(max ? { max } : {}) } }
+        }
     });
 
     return {
         rpm: createLineChart('rpmChart', 'RPM', chartState.rpm),
-        throttle: createLineChart('throttleChart', 'Throttle', chartState.throttle, 100),
-        brake: createLineChart('brakeChart', 'Brake', chartState.brake, 100)
+        throttle: createLineChart('throttleChart', 'Throttle (%)', chartState.throttle, 100),
+        brake: createLineChart('brakeChart', 'Brake (%)', chartState.brake, 100)
     };
 }
 
 function startTelemetryCharts() {
     if (typeof Chart === 'undefined') return;
     const charts = setupCharts();
+    if (!charts) return;
+
     let sample = 0;
 
     setInterval(() => {
-        const status = document.getElementById('sessionStatus')?.textContent?.trim();
-        if (status !== 'ACTIVE') return;
+        const status = document.getElementById('sessionStatus')?.textContent?.trim() || '';
+        if (!status.includes('ACTIVE')) return;
 
         chartState.labels.push(sample++);
         chartState.rpm.push(readNumber('rpm'));
