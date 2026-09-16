@@ -1,3 +1,5 @@
+import "./lap-timing.js";
+
 export function generateTelemetry(sessionSeconds = performance.now() / 1000) {
     const t = sessionSeconds % 24;
     const phase = (Math.sin(t * 0.55) + 1) / 2;
@@ -31,7 +33,6 @@ export function generateTelemetry(sessionSeconds = performance.now() / 1000) {
     speed = Math.max(0, speed);
     throttle = Math.max(0, Math.min(100, throttle));
     brake = Math.max(0, Math.min(100, brake));
-
     const rpm = Math.floor(speed * 38 + Math.sin(t * 4) * 180 + Math.random() * 160);
 
     let gear;
@@ -43,13 +44,8 @@ export function generateTelemetry(sessionSeconds = performance.now() / 1000) {
     else gear = 6;
 
     return {
-        speedKmh: Math.floor(speed),
-        rpm: Math.max(0, rpm),
-        gear,
-        throttlePercent: Math.floor(throttle),
-        brakePercent: Math.floor(brake),
-        speed: Math.floor(speed),
-        throttle: Math.floor(throttle),
-        brake: Math.floor(brake)
+        speedKmh: Math.floor(speed), rpm: Math.max(0, rpm), gear,
+        throttlePercent: Math.floor(throttle), brakePercent: Math.floor(brake),
+        speed: Math.floor(speed), throttle: Math.floor(throttle), brake: Math.floor(brake)
     };
 }
