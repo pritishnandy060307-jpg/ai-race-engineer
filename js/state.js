@@ -59,10 +59,15 @@ export function resetRaceState() {
     raceState.lap.deltaSeconds = null;
     raceState.lap.completedTimes.length = 0;
 
-    raceState.telemetry.speed.length = 0;
-    raceState.telemetry.rpm.length = 0;
-    raceState.telemetry.throttle.length = 0;
-    raceState.telemetry.brake.length = 0;
-    raceState.telemetry.gear.length = 0;
-    raceState.telemetry.timestamps.length = 0;
+    // Telemetry is replaced by the generator with scalar live values.
+    // Recreate the expected empty telemetry structure so a new session
+    // can always be started safely after a previous session ends.
+    raceState.telemetry = {
+        speed: [],
+        rpm: [],
+        throttle: [],
+        brake: [],
+        gear: [],
+        timestamps: []
+    };
 }
