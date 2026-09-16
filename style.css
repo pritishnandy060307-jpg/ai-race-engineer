@@ -12,47 +12,30 @@
 }
 
 html { scroll-behavior: smooth; }
-body {
-    margin: 0;
-    min-height: 100vh;
-    background: radial-gradient(circle at top, #18202a 0%, var(--bg) 48%);
-    color: var(--text);
-    font-family: Inter, Arial, sans-serif;
-    padding: 32px 18px;
-}
-
-.container {
-    width: min(1280px, 100%);
-    margin: auto;
-    padding: clamp(20px, 4vw, 42px);
-    background: rgba(18, 22, 28, 0.96);
-    border: 1px solid #242c36;
-    border-radius: 18px;
-    box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35);
-}
-
+body { margin: 0; min-height: 100vh; background: radial-gradient(circle at top, #18202a 0%, var(--bg) 48%); color: var(--text); font-family: Inter, Arial, sans-serif; padding: 32px 18px; }
+.container { width: min(1280px, 100%); margin: auto; padding: clamp(20px, 4vw, 42px); background: rgba(18, 22, 28, 0.96); border: 1px solid #242c36; border-radius: 18px; box-shadow: 0 24px 80px rgba(0, 0, 0, 0.35); }
 header { text-align: left; margin-bottom: 30px; border-bottom: 1px solid var(--border); padding-bottom: 24px; }
 h1 { font-size: clamp(32px, 5vw, 52px); margin: 0 0 8px; letter-spacing: 1px; }
 header p { color: var(--muted); font-size: 16px; margin: 0; }
-
 .cards { display: grid; grid-template-columns: repeat(9, minmax(105px, 1fr)); gap: 10px; }
 .card { background: linear-gradient(145deg, var(--panel-2), #141920); padding: 16px 10px; border: 1px solid var(--border); border-radius: 10px; text-align: left; min-width: 0; }
 .card h2 { margin: 0; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .7px; }
 .card p { font-size: clamp(19px, 2.2vw, 27px); color: var(--accent); margin: 12px 0 0; font-weight: 800; overflow-wrap: anywhere; }
-
 .tool-navigation { display: flex; flex-wrap: wrap; gap: 8px; margin: 25px 0 5px; padding: 12px; background: #0d1116; border: 1px solid var(--border); border-radius: 10px; position: sticky; top: 10px; z-index: 10; }
 .tool-navigation .nav-button { margin: 0; padding: 10px 14px; background: var(--panel-2); border: 1px solid #374151; border-radius: 7px; font-size: 13px; }
 .tool-navigation .nav-button:hover { background: #272d35; }
 .tool-navigation .nav-button.active { background: var(--accent); border-color: var(--accent); }
 .tool-category-title { margin: 28px 0 0; padding-bottom: 10px; border-bottom: 1px solid var(--border); font-size: 24px; }
 [hidden] { display: none !important; }
-
 .telemetry-section, .calculator-section { margin-top: 24px; background: var(--panel-2); border: 1px solid var(--border); padding: clamp(18px, 3vw, 28px); border-radius: 14px; }
 .telemetry-section h2, .calculator-section h2 { margin: 0 0 10px; font-size: 22px; }
 .calculator-description { color: var(--muted); line-height: 1.6; margin: 0 0 22px; }
 .chart-container { position: relative; width: 100%; height: 340px; }
 #speedChart { width: 100% !important; height: 100% !important; }
-
+.telemetry-chart-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.telemetry-chart-card { min-width: 0; background: #0f1318; border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
+.telemetry-chart-card h3 { margin: 0 0 12px; color: var(--muted); font-size: 14px; }
+.telemetry-chart-card .chart-container { height: 220px; }
 .calculator-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 18px 24px; }
 .calculator-grid label { display: flex; flex-direction: column; gap: 8px; color: #d1d5db; font-size: 14px; font-weight: bold; }
 .calculator-grid input, .calculator-grid select { width: 100%; padding: 12px 14px; border: 1px solid #374151; border-radius: 8px; background: #0d1116; color: white; font-size: 16px; }
@@ -74,16 +57,5 @@ header p { color: var(--muted); font-size: 16px; margin: 0; }
 button { display: block; margin: 20px auto 0; background: var(--accent); color: white; border: none; padding: 14px 28px; font-size: 16px; font-weight: 700; border-radius: 30px; cursor: pointer; transition: transform .2s, background .2s; }
 button:hover { background: #ff8533; transform: translateY(-1px); }
 button:focus-visible { outline: 2px solid white; outline-offset: 3px; }
-
-@media (max-width: 1100px) { .cards { grid-template-columns: repeat(5, minmax(120px, 1fr)); } }
-@media (max-width: 700px) {
-    body { padding: 12px 8px; }
-    .container { padding: 18px 14px; border-radius: 12px; }
-    header { text-align: center; }
-    .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-    .card { padding: 15px; }
-    .tool-navigation { position: static; }
-    .tool-navigation .nav-button { flex: 1 1 45%; }
-    .calculator-grid, .calculator-results, .calculator-results-3, .calculator-results-4, .calculator-results-6 { grid-template-columns: 1fr; }
-    .chart-container { height: 260px; }
-}
+@media (max-width: 1100px) { .cards { grid-template-columns: repeat(5, minmax(120px, 1fr)); } .telemetry-chart-grid { grid-template-columns: 1fr; } }
+@media (max-width: 700px) { body { padding: 12px 8px; } .container { padding: 18px 14px; border-radius: 12px; } header { text-align: center; } .cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } .card { padding: 15px; } .tool-navigation { position: static; } .tool-navigation .nav-button { flex: 1 1 45%; } .calculator-grid, .calculator-results, .calculator-results-3, .calculator-results-4, .calculator-results-6 { grid-template-columns: 1fr; } .chart-container { height: 260px; } }
