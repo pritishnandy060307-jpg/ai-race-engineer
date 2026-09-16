@@ -1,5 +1,27 @@
+import { raceState } from "./state.js";
 import "./lap-timing.js";
 import "./session-stats.js";
+
+function syncSpeedChart(telemetry, elapsedSeconds) {
+    if (typeof Chart === "undefined") return;
+    const canvas = document.getElementById("speedChart");
+    const chart = canvas ? Chart.getChart(canvas) : null;
+    if (!chart) return;
+
+    const labels = chart.data.labels;
+    const speeds = chart.data.datasets[0]?.data;
+    if (!Array.isArray(labels) || !Array.isArray(speeds)) return;
+
+    labels.push(Number(elapsedSeconds.toFixed(1)));
+    speeds.push(telemetry.speedKmh);
+    if (labels.length > 60) {
+        labels.shift();
+        speeds.shift();
+    }
+
+    chart.options.scales.y.suggestedMax = Math.max(200, ...speeds) + 10;
+    chart.update("none");
+}
 
 export function generateTelemetry(sessionSeconds = performance.now() / 1000) {
     const t = sessionSeconds % 24;
@@ -44,9 +66,23 @@ export function generateTelemetry(sessionSeconds = performance.now() / 1000) {
     else if (speed < 180) gear = 5;
     else gear = 6;
 
-    return {
-        speedKmh: Math.floor(speed), rpm: Math.max(0, rpm), gear,
-        throttlePercent: Math.floor(throttle), brakePercent: Math.floor(brake),
-        speed: Math.floor(speed), throttle: Math.floor(throttle), brake: Math.floor(brake)
+    const telemetry = {
+        speedKmh: Math.floor(speed),
+        rpm: Math.max(0, rpm),
+        gear,
+        throttlePercent: Math.floor(throttle),
+        brakePercent: Math.floor(brake),
+        speed: Math.floor(speed),
+        throttle: Math.floor(throttle),
+        brake: Math.floor(brake)
     };
+
+    raceState.vehicle.speedKmh = telemetry.speedKmh;
+    raceState.vehicle.rpm = telemetry.rpm;
+    raceState.vehicle.gear = telemetry.gear;
+    raceState.vehicle.throttlePercent = telemetry.throttlePercent;
+    raceState.vehicle.brakePercent = telemetry.brakePercent;
+    syncSpeedChart(telemetry, sessionSeconds);
+
+    return telemetry;
 }
