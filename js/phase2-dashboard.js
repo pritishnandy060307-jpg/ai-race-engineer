@@ -1,0 +1,117 @@
+const phase2State = {
+    active: false,
+    maxSpeed: 0,
+    maxRpm: 0,
+    throttleTotal: 0,
+    samples: 0,
+    brakingEvents: 0,
+    previousBrake: 0
+};
+
+function readNumber(id) {
+    const element = document.getElementById(id);
+    if (!element) return 0;
+    const value = Number.parseFloat(element.textContent.replace(/[^0-9.-]/g, ""));
+    return Number.isFinite(value) ? value : 0;
+}
+
+function addPanel() {
+    if (document.getElementById("phase2Dashboard")) return;
+
+    const section = document.createElement("section");
+    section.id = "phase2Dashboard";
+    section.className = "phase2-dashboard telemetry-section";
+    section.innerHTML = `
+        <div class="phase2-heading">
+            <div><h2>Session Dashboard</h2><p class="calculator-description">Live session information and driver-focused session statistics.</p></div>
+            <span id="sessionHealth" class="session-health neutral">STANDBY</span>
+        </div>
+        <div class="phase2-grid">
+            <div class="phase2-card"><span>Driver</span><strong>Pritish Nandy</strong></div>
+            <div class="phase2-card"><span>Vehicle</span><strong>Formula Student Car</strong></div>
+            <div class="phase2-card"><span>Session Type</span><strong>Practice</strong></div>
+            <div class="phase2-card"><span>Current Sector</span><strong id="currentSector">—</strong></div>
+        </div>
+        <div class="phase2-grid phase2-stats">
+            <div class="phase2-card"><span>Top Speed</span><strong id="sessionTopSpeed">—</strong></div>
+            <div class="phase2-card"><span>Peak RPM</span><strong id="sessionPeakRpm">—</strong></div>
+            <div class="phase2-card"><span>Average Throttle</span><strong id="sessionAverageThrottle">—</strong></div>
+            <div class="phase2-card"><span>Braking Events</span><strong id="sessionBrakingEvents">0</strong></div>
+        </div>
+        <div class="phase2-actions"><button id="resetSessionButton" type="button">Reset Session</button></div>
+        <div id="sessionSummary" class="session-summary" hidden></div>`;
+
+    const sessionControls = document.querySelector(".session-controls");
+    const firstCalculator = document.querySelector(".calculator-section");
+    (sessionControls || firstCalculator)?.after(section);
+}
+
+function resetStats() {
+    phase2State.maxSpeed = 0;
+    phase2State.maxRpm = 0;
+    phase2State.throttleTotal = 0;
+    phase2State.samples = 0;
+    phase2State.brakingEvents = 0;
+    phase2State.previousBrake = 0;
+    document.getElementById("sessionTopSpeed").textContent = "—";
+    document.getElementById("sessionPeakRpm").textContent = "—";
+    document.getElementById("sessionAverageThrottle").textContent = "—";
+    document.getElementById("sessionBrakingEvents").textContent = "0";
+    document.getElementById("currentSector").textContent = "—";
+    document.getElementById("sessionSummary").hidden = true;
+}
+
+function updateDashboard() {
+    const active = document.getElementById("sessionStatus")?.textContent?.trim() === "SESSION ACTIVE";
+    const health = document.getElementById("sessionHealth");
+    if (!health) return;
+
+    health.textContent = active ? "LIVE" : "STANDBY";
+    health.className = `session-health ${active ? "live" : "neutral"}`;
+
+    if (!active) return;
+
+    const speed = readNumber("speed");
+    const rpm = readNumber("rpm");
+    const throttle = readNumber("throttle");
+    const brake = readNumber("brake");
+    const sessionSeconds = readNumber("sessionTimer");
+
+    phase2State.maxSpeed = Math.max(phase2State.maxSpeed, speed);
+    phase2State.maxRpm = Math.max(phase2State.maxRpm, rpm);
+    phase2State.throttleTotal += throttle;
+    phase2State.samples += 1;
+    if (brake >= 70 && phase2State.previousBrake < 70) phase2State.brakingEvents += 1;
+    phase2State.previousBrake = brake;
+
+    document.getElementById("sessionTopSpeed").textContent = `${Math.round(phase2State.maxSpeed)} km/h`;
+    document.getElementById("sessionPeakRpm").textContent = `${Math.round(phase2State.maxRpm)} RPM`;
+    document.getElementById("sessionAverageThrottle").textContent = `${Math.round(phase2State.throttleTotal / phase2State.samples)}%`;
+    document.getElementById("sessionBrakingEvents").textContent = String(phase2State.brakingEvents);
+
+    const seconds = Math.floor(sessionSeconds);
+    const sector = (seconds % 60) < 20 ? 1 : (seconds % 60) < 40 ? 2 : 3;
+    document.getElementById("currentSector").textContent = `Sector ${sector}`;
+}
+
+function resetSession() {
+    const sessionButton = document.getElementById("sessionButton");
+    if (document.getElementById("sessionStatus")?.textContent?.trim() === "SESSION ACTIVE") sessionButton?.click();
+    resetStats();
+    const summary = document.getElementById("sessionSummary");
+    if (summary) {
+        summary.hidden = false;
+        summary.innerHTML = "<strong>Session reset.</strong><span>Start a new session to collect statistics.</span>";
+    }
+}
+
+function init() {
+    addPanel();
+    resetStats();
+    document.getElementById("resetSessionButton")?.addEventListener("click", resetSession);
+    setInterval(updateDashboard, 500);
+    updateDashboard();
+}
+
+document.addEventListener("DOMContentLoaded", init);
+if (document.readyState !== "loading") init();
