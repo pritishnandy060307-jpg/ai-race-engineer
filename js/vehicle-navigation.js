@@ -1,3 +1,5 @@
+import "./tyre-temperature.js?v=1";
+
 function showVehicleDynamics() {
     const vehicleIds = ["powerToWeightSection", "accelerationSection", "lapTimeSection", "lapDeltaSection", "weightTransferSection"];
     document.querySelectorAll(".calculator-section, .telemetry-section").forEach(section => {
