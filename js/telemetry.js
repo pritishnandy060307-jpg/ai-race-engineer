@@ -1,4 +1,4 @@
-export function generateTelemetry(sessionSeconds) {
+export function generateTelemetry(sessionSeconds = performance.now() / 1000) {
     const t = sessionSeconds % 24;
     const phase = (Math.sin(t * 0.55) + 1) / 2;
 
@@ -43,9 +43,12 @@ export function generateTelemetry(sessionSeconds) {
     else gear = 6;
 
     return {
-        speed: Math.floor(speed),
+        speedKmh: Math.floor(speed),
         rpm: Math.max(0, rpm),
         gear,
+        throttlePercent: Math.floor(throttle),
+        brakePercent: Math.floor(brake),
+        speed: Math.floor(speed),
         throttle: Math.floor(throttle),
         brake: Math.floor(brake)
     };
