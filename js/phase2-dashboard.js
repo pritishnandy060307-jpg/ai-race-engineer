@@ -8,6 +8,31 @@ const phase2State = {
     previousBrake: 0
 };
 
+function injectStyles() {
+    if (document.getElementById("phase2Styles")) return;
+    const style = document.createElement("style");
+    style.id = "phase2Styles";
+    style.textContent = `
+        .phase2-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; }
+        .phase2-heading h2 { margin-bottom:6px; }
+        .phase2-grid { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:12px; margin-top:16px; }
+        .phase2-card { background:#0f1318; border:1px solid var(--border); border-radius:10px; padding:16px; }
+        .phase2-card span { display:block; color:var(--muted); font-size:12px; margin-bottom:8px; text-transform:uppercase; letter-spacing:.5px; }
+        .phase2-card strong { color:var(--text); font-size:17px; overflow-wrap:anywhere; }
+        .session-health { display:inline-flex; align-items:center; justify-content:center; padding:7px 12px; border-radius:999px; font-size:12px; font-weight:800; letter-spacing:.5px; border:1px solid var(--border); }
+        .session-health.live { color:#86efac; border-color:#166534; background:rgba(34,197,94,.12); }
+        .session-health.neutral { color:var(--muted); background:#0f1318; }
+        .phase2-actions { display:flex; justify-content:flex-end; }
+        .phase2-actions button { margin:18px 0 0; background:transparent; border:1px solid var(--accent); color:var(--accent); padding:10px 18px; }
+        .phase2-actions button:hover { background:var(--accent-soft); }
+        .session-summary { display:flex; flex-direction:column; gap:5px; margin-top:16px; padding:14px; border-left:3px solid var(--accent); background:#0f1318; color:var(--muted); }
+        .session-summary strong { color:var(--text); }
+        @media (max-width:1100px) { .phase2-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+        @media (max-width:700px) { .phase2-heading { flex-direction:column; } .phase2-grid { grid-template-columns:1fr; } .phase2-actions { justify-content:stretch; } .phase2-actions button { width:100%; } }
+    `;
+    document.head.appendChild(style);
+}
+
 function readNumber(id) {
     const element = document.getElementById(id);
     if (!element) return 0;
@@ -68,7 +93,6 @@ function updateDashboard() {
 
     health.textContent = active ? "LIVE" : "STANDBY";
     health.className = `session-health ${active ? "live" : "neutral"}`;
-
     if (!active) return;
 
     const speed = readNumber("speed");
@@ -106,6 +130,7 @@ function resetSession() {
 }
 
 function init() {
+    injectStyles();
     addPanel();
     resetStats();
     document.getElementById("resetSessionButton")?.addEventListener("click", resetSession);
