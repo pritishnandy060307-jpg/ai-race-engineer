@@ -56,15 +56,20 @@ function resetPanel() {
 function updatePanel() {
     const active = raceState.session.active;
     const elapsed = Number(raceState.session.elapsedSeconds) || 0;
-    const times = Array.isArray(raceState.lap.completedTimes) ? raceState.lap.completedTimes.filter(Number.isFinite) : [];
+    const times = Array.isArray(raceState.lap.completedTimes)
+        ? raceState.lap.completedTimes.filter(Number.isFinite)
+        : [];
 
-    if (elapsed < state.lastElapsed || (!active && state.lastCompletedCount > 0)) {
+    // A true reset brings elapsed time back to zero. Stopping a session should
+    // preserve its completed-lap summary so the driver can review it.
+    if (elapsed < state.lastElapsed || (elapsed === 0 && state.lastElapsed > 0)) {
         state.lastCompletedCount = 0;
         state.lastElapsed = 0;
         resetPanel();
     }
 
-    if (!active) return;
+    // Keep the last session's results visible while the session is offline.
+    if (!active && times.length === 0) return;
 
     const completed = times.length;
     if (completed === 0) {
