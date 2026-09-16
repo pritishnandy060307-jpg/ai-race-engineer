@@ -1,3 +1,4 @@
+import "./session-repair.js?v=1";
 import "./tyre-temperature.js?v=1";
 import "./suspension-tools.js?v=1";
 import "./fuel-consumption.js?v=1";
