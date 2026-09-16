@@ -17,7 +17,26 @@ function showVehicleDynamics() {
     }
 }
 
+function showCategory(category, titleText) {
+    document.querySelectorAll(".calculator-section, .telemetry-section").forEach(section => {
+        const label = (section.getAttribute("aria-label") || "").toLowerCase();
+        const match = category === "suspension" ? label.includes("suspension") : category === "powertrain" ? label.includes("gear ratio") || label.includes("fuel consumption") : false;
+        section.hidden = !match;
+    });
+    document.querySelectorAll(".tool-category-title").forEach(title => title.remove());
+    const first = document.querySelector(`.calculator-section:not([hidden])`);
+    if (first) {
+        const title = document.createElement("h2");
+        title.className = "tool-category-title";
+        title.textContent = titleText;
+        first.before(title);
+    }
+}
+
 document.addEventListener("click", event => {
-    const button = event.target.closest('.nav-button[data-category="vehicle"]');
-    if (button) showVehicleDynamics();
+    const button = event.target.closest(".nav-button");
+    if (!button) return;
+    if (button.dataset.category === "vehicle") showVehicleDynamics();
+    if (button.dataset.category === "suspension") showCategory("suspension", "🔩 Suspension");
+    if (button.dataset.category === "powertrain") showCategory("powertrain", "🔧 Powertrain");
 });
