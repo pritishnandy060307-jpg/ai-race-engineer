@@ -120,7 +120,16 @@ function updateDashboard() {
 
 function resetSession() {
     const sessionButton = document.getElementById("sessionButton");
-    if (document.getElementById("sessionStatus")?.textContent?.trim() === "SESSION ACTIVE") sessionButton?.click();
+    const active = document.getElementById("sessionStatus")?.textContent?.trim() === "SESSION ACTIVE";
+
+    if (active) {
+        sessionButton?.click();
+    } else if (sessionButton) {
+        // Reuse the main session controller so its state, lap timing and chart are reset too.
+        sessionButton.click();
+        sessionButton.click();
+    }
+
     resetStats();
     const summary = document.getElementById("sessionSummary");
     if (summary) {
