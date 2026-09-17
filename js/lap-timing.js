@@ -9,6 +9,7 @@ let lapStartElapsed = 0;
 let nextCrossingElapsed = SIMULATED_LAP_LENGTHS[0];
 let completedLapCount = 0;
 let bestLap = null;
+let wasActive = false;
 
 function formatLapTime(seconds) {
     if (!Number.isFinite(seconds)) return "--:--.---";
@@ -31,8 +32,6 @@ function updateLapDisplay() {
     const delta = document.querySelector("#lapDelta");
     if (delta) delta.textContent = lap.deltaSeconds === null ? "--.---" : `${lap.deltaSeconds >= 0 ? "+" : ""}${lap.deltaSeconds.toFixed(3)} s`;
 
-    // Keep the dashboard's sector indicator synchronized with virtual track
-    // progress when that element exists.
     const lapDuration = SIMULATED_LAP_LENGTHS[completedLapCount % SIMULATED_LAP_LENGTHS.length];
     const progress = lapDuration > 0 ? current / lapDuration : 0;
     const sector = Math.min(SECTOR_COUNT, Math.floor(progress * SECTOR_COUNT) + 1);
@@ -41,23 +40,30 @@ function updateLapDisplay() {
     });
 }
 
-function resetTiming() {
+function resetTiming(clearHistory = false) {
     lastElapsed = 0;
     lapStartElapsed = 0;
     nextCrossingElapsed = SIMULATED_LAP_LENGTHS[0];
     completedLapCount = 0;
     bestLap = null;
-    raceState.lap.completedTimes.length = 0;
+    if (clearHistory) raceState.lap.completedTimes.length = 0;
 }
 
 setInterval(() => {
-    if (!raceState.session.active) {
-        resetTiming();
+    const active = Boolean(raceState.session.active);
+    if (!active) {
+        // Preserve completed laps after stopping so the analysis panel can
+        // be reviewed. A new start calls resetRaceState() in script.js.
+        if (wasActive) updateLapDisplay();
+        wasActive = false;
         return;
     }
 
+    if (!wasActive && raceState.session.elapsedSeconds === 0) resetTiming(true);
+    wasActive = true;
+
     const elapsed = Number(raceState.session.elapsedSeconds) || 0;
-    if (elapsed < lastElapsed) resetTiming();
+    if (elapsed < lastElapsed) resetTiming(true);
 
     while (elapsed >= nextCrossingElapsed) {
         const lapTime = nextCrossingElapsed - lapStartElapsed;
