@@ -5,11 +5,25 @@ const chartState = {
     brake: []
 };
 
+let telemetryCharts = null;
+let telemetryTimer = null;
+let sample = 0;
+let wasActive = false;
+
 function readNumber(id, fallback = 0) {
     const element = document.getElementById(id);
     if (!element) return fallback;
     const value = Number.parseFloat(element.textContent.replace(/[^0-9.-]/g, ''));
     return Number.isFinite(value) ? value : fallback;
+}
+
+function clearChartHistory() {
+    chartState.labels.length = 0;
+    chartState.rpm.length = 0;
+    chartState.throttle.length = 0;
+    chartState.brake.length = 0;
+    sample = 0;
+    telemetryCharts?.forEach(chart => chart.update('none'));
 }
 
 function createChartCard(title, canvasId) {
@@ -24,7 +38,14 @@ function setupCharts() {
 
     const section = document.createElement('section');
     section.className = 'telemetry-section';
-    section.innerHTML = '<h2>Live Telemetry Channels</h2>';
+    section.innerHTML = `
+        <div class="telemetry-section-heading">
+            <div>
+                <h2>Live Telemetry Channels</h2>
+                <p class="calculator-description">Real-time driver inputs and engine speed during an active session.</p>
+            </div>
+            <button id="clearTelemetryCharts" type="button">Clear Graphs</button>
+        </div>`;
 
     const grid = document.createElement('div');
     grid.className = 'telemetry-chart-grid';
@@ -50,7 +71,7 @@ function setupCharts() {
         type: 'line',
         data: {
             labels: chartState.labels,
-            datasets: [{ label, data, borderWidth: 2, tension: 0.25, pointRadius: 0 }]
+            datasets: [{ label, data, borderWidth: 2, tension: 0.25, pointRadius: 0, fill: false }]
         },
         options: {
             ...commonOptions,
@@ -58,24 +79,32 @@ function setupCharts() {
         }
     });
 
-    return {
-        rpm: createLineChart('rpmChart', 'RPM', chartState.rpm),
-        throttle: createLineChart('throttleChart', 'Throttle (%)', chartState.throttle, 100),
-        brake: createLineChart('brakeChart', 'Brake (%)', chartState.brake, 100)
-    };
+    const charts = [
+        createLineChart('rpmChart', 'RPM', chartState.rpm),
+        createLineChart('throttleChart', 'Throttle (%)', chartState.throttle, 100),
+        createLineChart('brakeChart', 'Brake (%)', chartState.brake, 100)
+    ];
+
+    document.getElementById('clearTelemetryCharts')?.addEventListener('click', clearChartHistory);
+    return charts;
 }
 
 function startTelemetryCharts() {
-    if (typeof Chart === 'undefined') return;
-    const charts = setupCharts();
-    if (!charts) return;
+    if (typeof Chart === 'undefined' || telemetryTimer) return;
+    telemetryCharts = setupCharts();
+    if (!telemetryCharts) return;
 
-    let sample = 0;
-
-    setInterval(() => {
+    telemetryTimer = setInterval(() => {
         const status = document.getElementById('sessionStatus')?.textContent?.trim() || '';
-        if (!status.includes('ACTIVE')) return;
+        const active = status.includes('ACTIVE');
 
+        if (!active) {
+            if (wasActive) clearChartHistory();
+            wasActive = false;
+            return;
+        }
+
+        wasActive = true;
         chartState.labels.push(sample++);
         chartState.rpm.push(readNumber('rpm'));
         chartState.throttle.push(readNumber('throttle'));
@@ -88,12 +117,12 @@ function startTelemetryCharts() {
             chartState.brake.shift();
         }
 
-        Object.values(charts).forEach(chart => chart.update('none'));
+        telemetryCharts.forEach(chart => chart.update('none'));
     }, 500);
 }
 
 if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', startTelemetryCharts);
+    document.addEventListener('DOMContentLoaded', startTelemetryCharts, { once: true });
 } else {
     startTelemetryCharts();
 }
