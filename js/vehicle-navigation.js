@@ -8,6 +8,7 @@ import "./phase2-dashboard.js?v=1";
 import "./performance-analysis.js?v=1";
 import "./phase2-enhancements.js?v=1";
 import "./lap-comparison.js?v=1";
+import "./ai-race-engineer.js?v=1";
 
 function moveSessionControls() {
     const status = document.querySelector(".status");
