@@ -34,6 +34,7 @@ function updateAdvice() {
     const rpm = Number(vehicle.rpm) || 0;
     const throttle = Number(vehicle.throttlePercent) || 0;
     const brake = Number(vehicle.brakePercent) || 0;
+    const delta = Number(lap.deltaSeconds);
     const recentThrottle = telemetry.throttle.slice(-10);
     const recentBrake = telemetry.brake.slice(-10);
     const averageThrottle = recentThrottle.length ? recentThrottle.reduce((sum, value) => sum + value, 0) / recentThrottle.length : throttle;
@@ -52,6 +53,9 @@ function updateAdvice() {
     if (rpm >= 9000) addMessage(container, "High engine speed", "Monitor the RPM limit and consider an earlier upshift if the engine is near its operating ceiling.");
     if (averageThrottle < 25 && speed > 20) addMessage(container, "Low average throttle", "Check whether corner exits or traction limitations are preventing earlier acceleration.");
     if (speed > 0 && brake < 5 && throttle < 5) addMessage(container, "Coasting detected", "Review the coasting zone to determine whether braking or throttle application can be made more deliberate.");
+    if (Number.isFinite(delta) && delta > 0.3) addMessage(container, "Behind the best lap", `Current lap is ${delta.toFixed(2)} s slower than the best lap. Compare sector exits and braking points first.`);
+    if (Number.isFinite(delta) && delta < -0.3) addMessage(container, "Ahead of the best lap", `Current lap is ${Math.abs(delta).toFixed(2)} s ahead of the best lap. Prioritize consistency and avoid unnecessary risk.`);
+    if (brake > 15 && throttle > 5 && throttle < 35) addMessage(container, "Brake release transition", "A partial throttle input during braking was detected. Review whether a smoother brake release can improve corner entry balance.");
 
     if (!container.children.length) addMessage(container, "Session stable", "No immediate rule-based warning detected. Continue monitoring speed, RPM, throttle, brake, and lap delta.");
 }
