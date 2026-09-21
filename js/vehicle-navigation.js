@@ -6,6 +6,7 @@ import "./telemetry-charts.js?v=1";
 import "./race-insights.js?v=1";
 import "./phase2-dashboard.js?v=1";
 import "./performance-analysis.js?v=1";
+import "./phase2-enhancements.js?v=1";
 
 function moveSessionControls() {
     const status = document.querySelector(".status");
