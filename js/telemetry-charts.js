@@ -99,7 +99,7 @@ function startTelemetryCharts() {
         const active = status.includes('ACTIVE');
 
         if (!active) {
-            if (wasActive) clearChartHistory();
+            // Keep the completed session visible instead of clearing the graphs.
             wasActive = false;
             return;
         }
