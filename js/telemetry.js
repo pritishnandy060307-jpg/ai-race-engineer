@@ -2,27 +2,6 @@ import { raceState } from "./state.js";
 import "./lap-timing.js";
 import "./session-stats.js";
 
-function syncSpeedChart(telemetry, elapsedSeconds) {
-    if (typeof Chart === "undefined") return;
-    const canvas = document.getElementById("speedChart");
-    const chart = canvas ? Chart.getChart(canvas) : null;
-    if (!chart) return;
-
-    const labels = chart.data.labels;
-    const speeds = chart.data.datasets[0]?.data;
-    if (!Array.isArray(labels) || !Array.isArray(speeds)) return;
-
-    labels.push(Number(elapsedSeconds.toFixed(1)));
-    speeds.push(telemetry.speedKmh);
-    if (labels.length > 60) {
-        labels.shift();
-        speeds.shift();
-    }
-
-    chart.options.scales.y.suggestedMax = Math.max(200, ...speeds) + 10;
-    chart.update("none");
-}
-
 export function generateTelemetry(sessionSeconds = performance.now() / 1000) {
     const t = sessionSeconds % 24;
     const phase = (Math.sin(t * 0.55) + 1) / 2;
@@ -82,7 +61,5 @@ export function generateTelemetry(sessionSeconds = performance.now() / 1000) {
     raceState.vehicle.gear = telemetry.gear;
     raceState.vehicle.throttlePercent = telemetry.throttlePercent;
     raceState.vehicle.brakePercent = telemetry.brakePercent;
-    syncSpeedChart(telemetry, sessionSeconds);
-
     return telemetry;
 }
