@@ -4,6 +4,14 @@ const elements = {
     gear: document.querySelector("#gear"),
     throttle: document.querySelector("#throttle"),
     brake: document.querySelector("#brake"),
+    steering: document.querySelector("#steering"),
+    engineTemp: document.querySelector("#engineTemp"),
+    coolantTemp: document.querySelector("#coolantTemp"),
+    oilTemp: document.querySelector("#oilTemp"),
+    batteryVoltage: document.querySelector("#batteryVoltage"),
+    batteryCurrent: document.querySelector("#batteryCurrent"),
+    lateralG: document.querySelector("#lateralGTelemetry"),
+    longitudinalG: document.querySelector("#longitudinalGTelemetry"),
     lapNumber: document.querySelector("#lapNumber"),
     lapTime: document.querySelector("#lapTime"),
     bestLap: document.querySelector("#bestLap"),
@@ -20,6 +28,14 @@ export function updateTelemetryUI(vehicle) {
     elements.gear.textContent = vehicle.gear;
     elements.throttle.textContent = `${vehicle.throttlePercent}%`;
     elements.brake.textContent = `${vehicle.brakePercent}%`;
+    if (elements.steering) elements.steering.textContent = `${vehicle.steeringDeg ?? 0}°`;
+    if (elements.engineTemp) elements.engineTemp.textContent = `${vehicle.engineTempC ?? 0} °C`;
+    if (elements.coolantTemp) elements.coolantTemp.textContent = `${vehicle.coolantTempC ?? 0} °C`;
+    if (elements.oilTemp) elements.oilTemp.textContent = `${vehicle.oilTempC ?? 0} °C`;
+    if (elements.batteryVoltage) elements.batteryVoltage.textContent = `${vehicle.batteryVoltageV ?? 0} V`;
+    if (elements.batteryCurrent) elements.batteryCurrent.textContent = `${vehicle.batteryCurrentA ?? 0} A`;
+    if (elements.lateralG) elements.lateralG.textContent = `${vehicle.lateralG ?? 0} g`;
+    if (elements.longitudinalG) elements.longitudinalG.textContent = `${vehicle.longitudinalG ?? 0} g`;
 }
 
 export function updateSessionUI(state) {
