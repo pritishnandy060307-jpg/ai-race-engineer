@@ -2,7 +2,7 @@ import { raceState } from "./state.js";
 import "./lap-timing.js";
 import "./session-stats.js";
 
-export function generateTelemetry(sessionSeconds = performance.now() / 1000) {
+export function generateTelemetry(sessionSeconds = raceState.session.elapsedSeconds) {
     const t = sessionSeconds % 24;
     const phase = (Math.sin(t * 0.55) + 1) / 2;
 
@@ -35,6 +35,7 @@ export function generateTelemetry(sessionSeconds = performance.now() / 1000) {
     speed = Math.max(0, speed);
     throttle = Math.max(0, Math.min(100, throttle));
     brake = Math.max(0, Math.min(100, brake));
+
     const rpm = Math.floor(speed * 38 + Math.sin(t * 4) * 180 + Math.random() * 160);
 
     let gear;
@@ -45,15 +46,33 @@ export function generateTelemetry(sessionSeconds = performance.now() / 1000) {
     else if (speed < 180) gear = 5;
     else gear = 6;
 
+    const steeringDeg = Number((Math.sin(t * 0.9) * 10 + Math.sin(t * 2.1) * 3).toFixed(1));
+    const lateralG = Number((Math.sin(t * 0.75) * 1.35 + Math.sin(t * 2.4) * 0.12).toFixed(2));
+    const longitudinalG = Number(((throttle / 100) * 0.85 - (brake / 100) * 1.25 + Math.sin(t * 1.8) * 0.05).toFixed(2));
+    const engineTempC = Math.round(82 + throttle * 0.28 + Math.sin(t * 0.35) * 4);
+    const coolantTempC = Math.round(74 + throttle * 0.20 + Math.sin(t * 0.32) * 3);
+    const oilTempC = Math.round(86 + throttle * 0.24 + Math.sin(t * 0.28) * 5);
+    const batteryVoltageV = Number((400 - throttle * 0.12 - Math.abs(lateralG) * 1.5).toFixed(1));
+    const batteryCurrentA = Math.round(18 + throttle * 1.45 + Math.max(0, longitudinalG) * 35);
+
     const telemetry = {
         speedKmh: Math.floor(speed),
         rpm: Math.max(0, rpm),
         gear,
         throttlePercent: Math.floor(throttle),
         brakePercent: Math.floor(brake),
+        steeringDeg,
+        lateralG,
+        longitudinalG,
+        engineTempC,
+        coolantTempC,
+        oilTempC,
+        batteryVoltageV,
+        batteryCurrentA,
         speed: Math.floor(speed),
         throttle: Math.floor(throttle),
-        brake: Math.floor(brake)
+        brake: Math.floor(brake),
+        steering: steeringDeg
     };
 
     raceState.vehicle.speedKmh = telemetry.speedKmh;
@@ -61,5 +80,6 @@ export function generateTelemetry(sessionSeconds = performance.now() / 1000) {
     raceState.vehicle.gear = telemetry.gear;
     raceState.vehicle.throttlePercent = telemetry.throttlePercent;
     raceState.vehicle.brakePercent = telemetry.brakePercent;
+
     return telemetry;
 }
