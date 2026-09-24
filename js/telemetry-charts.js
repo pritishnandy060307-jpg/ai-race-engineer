@@ -2,127 +2,172 @@ const chartState = {
     labels: [],
     rpm: [],
     throttle: [],
-    brake: []
+    brake: [],
+    gear: [],
+    steering: [],
+    speed: [],
+    gg: []
 };
 
-let telemetryCharts = null;
+let telemetryCharts = [];
 let telemetryTimer = null;
-let sample = 0;
-let wasActive = false;
-
-function readNumber(id, fallback = 0) {
-    const element = document.getElementById(id);
-    if (!element) return fallback;
-    const value = Number.parseFloat(element.textContent.replace(/[^0-9.-]/g, ''));
-    return Number.isFinite(value) ? value : fallback;
-}
 
 function clearChartHistory() {
-    chartState.labels.length = 0;
-    chartState.rpm.length = 0;
-    chartState.throttle.length = 0;
-    chartState.brake.length = 0;
-    sample = 0;
-    telemetryCharts?.forEach(chart => chart.update('none'));
+    Object.values(chartState).forEach(values => values.length = 0);
+    telemetryCharts.forEach(chart => chart.update("none"));
 }
 
-function createChartCard(title, canvasId) {
-    const card = document.createElement('div');
-    card.className = 'telemetry-chart-card';
+function createChartCard(title, canvasId, className = "") {
+    const card = document.createElement("div");
+    card.className = `telemetry-chart-card ${className}`.trim();
     card.innerHTML = `<h3>${title}</h3><div class="chart-container"><canvas id="${canvasId}"></canvas></div>`;
     return card;
 }
 
 function setupCharts() {
-    if (document.getElementById('rpmChart')) return null;
+    if (document.getElementById("rpmChart")) return [];
 
-    const section = document.createElement('section');
-    section.className = 'telemetry-section';
+    const section = document.createElement("section");
+    section.className = "telemetry-section";
+    section.dataset.category = "dashboard";
     section.innerHTML = `
         <div class="telemetry-section-heading">
             <div>
-                <h2>Live Telemetry Channels</h2>
-                <p class="calculator-description">Real-time driver inputs and engine speed during an active session.</p>
+                <h2>Live Telemetry Analysis</h2>
+                <p class="calculator-description">Driver inputs, engine state, vehicle motion and combined telemetry during the active session.</p>
             </div>
             <button id="clearTelemetryCharts" type="button">Clear Graphs</button>
         </div>`;
 
-    const grid = document.createElement('div');
-    grid.className = 'telemetry-chart-grid';
+    const grid = document.createElement("div");
+    grid.className = "telemetry-chart-grid";
     grid.append(
-        createChartCard('RPM', 'rpmChart'),
-        createChartCard('Throttle (%)', 'throttleChart'),
-        createChartCard('Brake (%)', 'brakeChart')
+        createChartCard("RPM", "rpmChart"),
+        createChartCard("Gear Trace", "gearChart"),
+        createChartCard("Steering (°)", "steeringChart"),
+        createChartCard("Combined Telemetry", "combinedTelemetryChart", "telemetry-chart-wide"),
+        createChartCard("G-G Diagram", "ggChart", "telemetry-chart-wide")
     );
     section.appendChild(grid);
 
-    const speedSection = document.getElementById('speedChart')?.closest('.telemetry-section');
+    const speedSection = document.getElementById("speedChart")?.closest(".telemetry-section");
     speedSection?.after(section);
 
-    const commonOptions = {
+    const common = {
         responsive: true,
         maintainAspectRatio: false,
         animation: false,
-        scales: { y: { beginAtZero: true } },
+        interaction: { mode: "index", intersect: false },
         plugins: { legend: { display: true } }
     };
 
-    const createLineChart = (id, label, data, max) => new Chart(document.getElementById(id), {
-        type: 'line',
+    const line = (id, label, data, yTitle, extra = {}) => new Chart(document.getElementById(id), {
+        type: "line",
         data: {
             labels: chartState.labels,
-            datasets: [{ label, data, borderWidth: 2, tension: 0.25, pointRadius: 0, fill: false }]
+            datasets: [{ label, data, borderWidth: 2, tension: 0.2, pointRadius: 0, fill: false }]
         },
         options: {
-            ...commonOptions,
-            scales: { y: { beginAtZero: true, ...(max ? { max } : {}) } }
+            ...common,
+            scales: {
+                x: { title: { display: true, text: "Session Time (s)" } },
+                y: { beginAtZero: false, title: { display: true, text: yTitle }, ...extra }
+            }
         }
     });
 
-    const charts = [
-        createLineChart('rpmChart', 'RPM', chartState.rpm),
-        createLineChart('throttleChart', 'Throttle (%)', chartState.throttle, 100),
-        createLineChart('brakeChart', 'Brake (%)', chartState.brake, 100)
-    ];
+    const rpm = line("rpmChart", "RPM", chartState.rpm, "RPM", { beginAtZero: true });
+    const gear = line("gearChart", "Gear", chartState.gear, "Gear", { min: 1, max: 6, ticks: { stepSize: 1 } });
+    const steering = line("steeringChart", "Steering", chartState.steering, "Angle (°)", { suggestedMin: -15, suggestedMax: 15 });
 
-    document.getElementById('clearTelemetryCharts')?.addEventListener('click', clearChartHistory);
-    return charts;
+    const combined = new Chart(document.getElementById("combinedTelemetryChart"), {
+        type: "line",
+        data: {
+            labels: chartState.labels,
+            datasets: [
+                { label: "Speed (km/h)", data: chartState.speed, borderWidth: 2, tension: 0.2, pointRadius: 0, yAxisID: "speed" },
+                { label: "Throttle (%)", data: chartState.throttle, borderWidth: 2, tension: 0.2, pointRadius: 0, yAxisID: "inputs" },
+                { label: "Brake (%)", data: chartState.brake, borderWidth: 2, tension: 0.2, pointRadius: 0, yAxisID: "inputs" }
+            ]
+        },
+        options: {
+            ...common,
+            scales: {
+                x: { title: { display: true, text: "Session Time (s)" } },
+                speed: { type: "linear", position: "left", title: { display: true, text: "Speed (km/h)" }, beginAtZero: true },
+                inputs: { type: "linear", position: "right", min: 0, max: 100, title: { display: true, text: "Driver Input (%)" }, grid: { drawOnChartArea: false } }
+            }
+        }
+    });
+
+    const gg = new Chart(document.getElementById("ggChart"), {
+        type: "scatter",
+        data: {
+            datasets: [{
+                label: "G-G Envelope",
+                data: chartState.gg,
+                borderWidth: 2,
+                pointRadius: 3,
+                showLine: false
+            }]
+        },
+        options: {
+            ...common,
+            scales: {
+                x: { title: { display: true, text: "Lateral G" }, min: -1.6, max: 1.6 },
+                y: { title: { display: true, text: "Longitudinal G" }, min: -1.4, max: 1.2 }
+            }
+        }
+    });
+
+    telemetryCharts = [rpm, gear, steering, combined, gg];
+    document.getElementById("clearTelemetryCharts")?.addEventListener("click", clearChartHistory);
+    return telemetryCharts;
 }
 
 function startTelemetryCharts() {
-    if (typeof Chart === 'undefined' || telemetryTimer) return;
-    telemetryCharts = setupCharts();
-    if (!telemetryCharts) return;
+    if (typeof Chart === "undefined" || telemetryTimer) return;
+
+    setupCharts();
+    if (!telemetryCharts.length) return;
 
     telemetryTimer = setInterval(() => {
-        const status = document.getElementById('sessionStatus')?.textContent?.trim() || '';
-        const active = status.includes('ACTIVE');
+        const status = document.getElementById("sessionStatus")?.textContent?.trim() || "";
+        if (!status.includes("ACTIVE")) return;
 
-        if (!active) {
-            // Keep the completed session visible instead of clearing the graphs.
-            wasActive = false;
-            return;
-        }
+        const telemetry = window.raceTelemetry;
+        if (!telemetry) return;
 
-        wasActive = true;
-        chartState.labels.push(sample++);
-        chartState.rpm.push(readNumber('rpm'));
-        chartState.throttle.push(readNumber('throttle'));
-        chartState.brake.push(readNumber('brake'));
+        const time = Number(document.getElementById("sessionTimer")?.dataset?.seconds);
+        const fallbackTime = chartState.labels.length ? Number(chartState.labels.at(-1)) + 0.5 : 0;
+        const t = Number.isFinite(time) ? time : fallbackTime;
 
-        if (chartState.labels.length > 60) {
+        chartState.labels.push(t.toFixed(1));
+        chartState.rpm.push(telemetry.rpm);
+        chartState.gear.push(telemetry.gear);
+        chartState.steering.push(telemetry.steeringDeg);
+        chartState.speed.push(telemetry.speedKmh);
+        chartState.throttle.push(telemetry.throttlePercent);
+        chartState.brake.push(telemetry.brakePercent);
+        chartState.gg.push({ x: telemetry.lateralG, y: telemetry.longitudinalG });
+
+        if (chartState.labels.length > 120) {
             chartState.labels.shift();
             chartState.rpm.shift();
+            chartState.gear.shift();
+            chartState.steering.shift();
+            chartState.speed.shift();
             chartState.throttle.shift();
             chartState.brake.shift();
+            chartState.gg.shift();
         }
 
-        telemetryCharts.forEach(chart => chart.update('none'));
+        telemetryCharts.forEach(chart => chart.update("none"));
     }, 500);
 }
 
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', startTelemetryCharts, { once: true });
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", startTelemetryCharts, { once: true });
 } else {
     startTelemetryCharts();
 }
