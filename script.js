@@ -100,6 +100,6 @@ function toggleSession() { if (raceState.session.active) endSession(); else star
 function startSession() { resetRaceState(); raceState.session.active = true; raceState.session.status = "SESSION ACTIVE"; clearChartHistory(); resetSessionUI(); setSessionStatus(true); sessionTimer = setInterval(tickSession, 100); telemetryTimer = setInterval(updateTelemetry, 500); }
 function endSession() { raceState.session.active = false; raceState.session.status = "OFFLINE"; clearInterval(sessionTimer); clearInterval(telemetryTimer); sessionTimer = null; telemetryTimer = null; setSessionStatus(false); }
 function tickSession() { raceState.session.elapsedSeconds = Number((raceState.session.elapsedSeconds + 0.1).toFixed(1)); updateSessionUI(raceState); }
-function updateTelemetry() { const telemetry = generateTelemetry(); raceState.telemetry = telemetry; updateTelemetryUI(telemetry); updateChart(telemetry); }
+function updateTelemetry() { const telemetry = generateTelemetry(raceState.session.elapsedSeconds); raceState.telemetry = telemetry; window.raceTelemetry = telemetry; updateTelemetryUI(telemetry); updateChart(telemetry); }
 function updateChart(telemetry) { if (!chart) return; const t = raceState.session.elapsedSeconds; chartData.labels.push(t.toFixed(1)); chartData.speed.push(telemetry.speedKmh); if (chartData.labels.length > 120) { chartData.labels.shift(); chartData.speed.shift(); } chart.update("none"); }
 function clearChartHistory() { chartData.labels.length = 0; chartData.speed.length = 0; chart?.update("none"); }
