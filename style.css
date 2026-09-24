@@ -36,6 +36,12 @@ header p { color: var(--muted); font-size: 16px; margin: 0; }
 .telemetry-chart-card { min-width: 0; background: #0f1318; border: 1px solid var(--border); border-radius: 10px; padding: 14px; }
 .telemetry-chart-card h3 { margin: 0 0 12px; color: var(--muted); font-size: 14px; }
 .telemetry-chart-card .chart-container { height: 220px; }
+.telemetry-chart-wide { grid-column: span 2; }
+.telemetry-section-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 18px; margin-bottom: 18px; }
+.telemetry-section-heading h2 { margin-bottom: 6px; }
+.telemetry-section-heading button { margin: 0; padding: 10px 16px; font-size: 13px; }
+@media (max-width: 900px) { .telemetry-chart-wide { grid-column: span 1; } }
+
 .insights-section { border-left: 3px solid var(--accent); }
 .insights-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 18px; }
 .insights-heading h2 { margin-bottom: 6px; }
