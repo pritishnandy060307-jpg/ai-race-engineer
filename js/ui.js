@@ -53,6 +53,7 @@ export function updateSessionUI(state) {
     }
 
     elements.sessionTimer.textContent = formatSessionTime(state.session.elapsedSeconds);
+    elements.sessionTimer.dataset.seconds = state.session.elapsedSeconds;
 }
 
 export function setSessionStatus(active) {
