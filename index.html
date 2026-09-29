@@ -11,8 +11,25 @@
         <header><h1>AI Race Engineer</h1><p>Your personal race engineer.</p></header>
         <nav class="main-tabs" aria-label="Main navigation">
             <button class="main-tab active" data-view="engineer" type="button">🏁 Race Engineer</button>
+            <button class="main-tab" data-view="all-tools" type="button">🛠️ All Tools</button>
             <button class="main-tab" data-view="rulebooks" type="button">📘 Rulebooks</button>
         </nav>
+        <section class="all-tools-section" id="allToolsSection" aria-label="Engineering toolbox" hidden>
+            <div class="all-tools-heading">
+                <div>
+                    <span class="eyebrow">ENGINEERING TOOLBOX</span>
+                    <h2>🛠️ All Tools</h2>
+                    <p>Find the calculation or analysis you need without scrolling through the whole engineer workspace.</p>
+                </div>
+                <span class="tool-count" id="allToolsCount">0 TOOLS</span>
+            </div>
+            <div class="all-tools-search">
+                <input id="allToolsSearch" type="search" placeholder="Search tools: brake bias, y+, tyre, lap time..." aria-label="Search engineering tools">
+            </div>
+            <div class="tool-category-chips" id="toolCategoryChips" aria-label="Tool categories"></div>
+            <div class="all-tools-grid" id="allToolsGrid"></div>
+        </section>
+
         <section class="cards" aria-label="Race telemetry">
             <div class="card"><h2>Speed</h2><p id="speed">184 km/h</p></div><div class="card"><h2>Lap</h2><p id="lapNumber">1</p></div><div class="card"><h2>Lap Time</h2><p id="lapTime">00:00.000</p></div><div class="card"><h2>Best Lap</h2><p id="bestLap">--:--.---</p></div><div class="card"><h2>Delta</h2><p id="lapDelta">--.---</p></div><div class="card"><h2>RPM</h2><p id="rpm">6500</p></div><div class="card"><h2>Gear</h2><p id="gear">4</p></div><div class="card"><h2>Throttle</h2><p id="throttle">72%</p></div><div class="card"><h2>Brake</h2><p id="brake">0%</p></div><div class="card"><h2>Steering</h2><p id="steering">0°</p></div><div class="card"><h2>Engine Temp</h2><p id="engineTemp">0 °C</p></div><div class="card"><h2>Coolant Temp</h2><p id="coolantTemp">0 °C</p></div><div class="card"><h2>Oil Temp</h2><p id="oilTemp">0 °C</p></div><div class="card"><h2>Battery</h2><p id="batteryVoltage">0 V</p></div><div class="card"><h2>Current</h2><p id="batteryCurrent">0 A</p></div><div class="card"><h2>Lateral G</h2><p id="lateralGTelemetry">0 g</p></div><div class="card"><h2>Longitudinal G</h2><p id="longitudinalGTelemetry">0 g</p></div>
         </section>
