@@ -7,11 +7,11 @@ const RULEBOOKS = [
     official:"https://www.imeche.org/events/formula-student"
   },
   {
-    id:"f1", series:"Formula 1", title:"FIA Formula 1 Sporting Regulations",
-    version:"2025 • Issue 1", description:"The 2025 FIA Formula 1 Sporting Regulations document supplied for this project. The FIA regulation hub is also linked so the current revision can be checked.",
-    tags:["Sporting","2025","FIA","Race Procedures"],
-    url:"https://www.fia.com/sites/default/files/fia_2025_formula_1_sporting_regulations_-_issue_1_-_2024-07-31.pdf",
-    official:"https://www.fia.com/regulation/category/2182"
+    id:"f1", series:"Formula 1", title:"FIA Formula 1 Regulations",
+    version:"2026 • Live FIA hub", description:"Use the FIA Formula One regulation hub for the current 2026 General, Sporting, Technical, Financial and Operational sections. Revisions can change during the season.",
+    tags:["Sporting","Technical","2026","FIA"],
+    url:"https://www.fia.com/regulation/category/110",
+    official:"https://www.fia.com/regulation/category/110"
   },
   {
     id:"nascar", series:"NASCAR", title:"NASCAR 2026 Competition & Technical Rules",
