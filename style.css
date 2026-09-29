@@ -103,3 +103,10 @@ button:focus-visible { outline: 2px solid white; outline-offset: 3px; }
 .rulebook-empty { grid-column:1/-1; padding:24px; text-align:center; color:var(--muted); border:1px dashed var(--border); border-radius:10px; }
 @media (max-width:900px) { .rulebook-grid { grid-template-columns:1fr; } }
 @media (max-width:700px) { .rulebook-heading { flex-direction:column; } .rulebook-controls { grid-template-columns:1fr; } }
+
+
+.main-tabs { display:flex; gap:8px; margin:0 0 22px; padding:8px; background:#0d1116; border:1px solid var(--border); border-radius:10px; }
+.main-tab { margin:0; padding:11px 18px; background:transparent; border:1px solid transparent; border-radius:7px; color:var(--muted); font-size:13px; }
+.main-tab:hover { background:#1b222b; color:var(--text); transform:none; }
+.main-tab.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+@media (max-width:700px) { .main-tabs { width:100%; } .main-tab { flex:1; } }
