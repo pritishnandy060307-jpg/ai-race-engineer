@@ -110,3 +110,28 @@ button:focus-visible { outline: 2px solid white; outline-offset: 3px; }
 .main-tab:hover { background:#1b222b; color:var(--text); transform:none; }
 .main-tab.active { background:var(--accent); border-color:var(--accent); color:#fff; }
 @media (max-width:700px) { .main-tabs { width:100%; } .main-tab { flex:1; } }
+
+
+.all-tools-section { margin:0 0 24px; background:linear-gradient(145deg,#171d25,#10151b); border:1px solid var(--border); border-radius:14px; padding:clamp(18px,3vw,28px); }
+.all-tools-heading { display:flex; justify-content:space-between; align-items:flex-start; gap:18px; margin-bottom:18px; }
+.all-tools-heading h2 { margin:5px 0 7px; font-size:25px; }
+.all-tools-heading p { margin:0; color:var(--muted); line-height:1.55; }
+.tool-count { border:1px solid var(--border); border-radius:999px; padding:7px 11px; color:var(--muted); font-size:11px; font-weight:800; white-space:nowrap; }
+.all-tools-search input { width:100%; box-sizing:border-box; padding:13px 15px; border:1px solid #374151; border-radius:9px; background:#0d1116; color:#fff; font-size:15px; }
+.all-tools-search input:focus { outline:2px solid var(--accent); outline-offset:1px; }
+.tool-category-chips { display:flex; flex-wrap:wrap; gap:8px; margin:14px 0 18px; }
+.tool-chip { margin:0; padding:8px 11px; background:#171d25; border:1px solid #374151; border-radius:999px; color:#cbd5e1; font-size:12px; font-weight:700; }
+.tool-chip:hover { background:#222b35; transform:none; }
+.tool-chip.active { background:var(--accent); border-color:var(--accent); color:#fff; }
+.all-tools-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; }
+.tool-card { display:flex; flex-direction:column; min-height:185px; padding:16px; border:1px solid var(--border); border-radius:11px; background:#0f1318; transition:border-color .2s, transform .2s; }
+.tool-card:hover { border-color:#566170; transform:translateY(-2px); }
+.tool-card-top { display:flex; justify-content:space-between; gap:10px; }
+.tool-card-category { color:var(--accent); font-size:10px; font-weight:800; letter-spacing:.7px; text-transform:uppercase; }
+.tool-card-arrow { color:#697586; }
+.tool-card h3 { margin:10px 0 7px; font-size:17px; }
+.tool-card p { margin:0 0 14px; color:var(--muted); font-size:12px; line-height:1.5; }
+.open-tool-button { margin:auto 0 0; width:100%; padding:9px 12px; border-radius:7px; font-size:12px; }
+.tool-empty { grid-column:1/-1; padding:28px; text-align:center; color:var(--muted); border:1px dashed var(--border); border-radius:10px; }
+@media (max-width:900px) { .all-tools-grid { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media (max-width:700px) { .all-tools-heading { flex-direction:column; } .all-tools-grid { grid-template-columns:1fr; } .tool-category-chips { overflow-x:auto; flex-wrap:nowrap; padding-bottom:4px; } .tool-chip { flex:0 0 auto; } }
