@@ -22,6 +22,16 @@ const RULEBOOKS = [
   }
 ];
 
+
+function setMainView(view) {
+  const rulebook = document.getElementById("rulebookSection");
+  const mainContent = document.querySelectorAll(".cards, .telemetry-section, .calculator-section, .status, .timer, #sessionButton, .session-controls, .tool-category-title");
+  mainContent.forEach(el => { el.hidden = view === "rulebooks"; });
+  if (rulebook) rulebook.hidden = view !== "rulebooks";
+  document.querySelectorAll(".main-tab").forEach(tab => tab.classList.toggle("active", tab.dataset.view === view));
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
 function renderRulebooks() {
   const grid=document.getElementById("rulebookGrid");
   const search=(document.getElementById("rulebookSearch")?.value||"").trim().toLowerCase();
@@ -43,7 +53,10 @@ function renderRulebooks() {
     </article>`).join("") : '<div class="rulebook-empty">No matching rulebook topics found.</div>';
 }
 document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("rulebookSection")?.setAttribute("hidden", "");
+  document.querySelectorAll(".main-tab").forEach(tab => tab.addEventListener("click", () => setMainView(tab.dataset.view)));
   renderRulebooks();
+  setMainView("engineer");
   document.getElementById("rulebookSearch")?.addEventListener("input", renderRulebooks);
   document.getElementById("rulebookSeries")?.addEventListener("change", renderRulebooks);
 });
