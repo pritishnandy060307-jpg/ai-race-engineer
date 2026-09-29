@@ -23,34 +23,50 @@ const RULEBOOKS = [
 ];
 
 
+const TOOLBOX = [
+  {category:"Vehicle Dynamics", icon:"🚗", tools:[["Power-to-Weight","Compare power against vehicle mass.","powerToWeightSection"],["Acceleration","Estimate longitudinal acceleration from power, drag and rolling resistance.","accelerationSection"],["Lap Time","Estimate lap time from track length and average speed.","lapTimeSection"],["Lap Delta","Compare current and reference lap times.","lapDeltaSection"],["Weight Transfer","Analyze longitudinal/lateral load transfer.","weightTransferSection"],["Cornering Speed","Estimate theoretical cornering speed from radius and tyre friction.","corneringSpeedSection"],["Lateral G","Calculate lateral acceleration from speed and radius.","lateralGSection"]]} ,
+  {category:"Aerodynamics & CFD", icon:"🌬️", tools:[["Downforce","Calculate aerodynamic downforce and dynamic pressure.","downforceSection"],["Inflation Layer","Estimate first-layer height, boundary-layer thickness and growth ratio.","inflationLayerSection"],["Inlet Turbulence","Calculate k, ω, ε and turbulent viscosity from inlet conditions.","inletTurbulenceSection"],["Particle Settling","Estimate terminal settling velocity with drag correction.","particleSettlingSection"],["Humidity","Calculate humidity quantities from temperature, pressure and RH.","humiditySection"]]} ,
+  {category:"Brakes & Tyres", icon:"🛞", tools:[["Brake Bias","Estimate front/rear braking-force distribution and load transfer.","brakeBiasSection"],["Stopping Distance","Calculate reaction, braking and total stopping distance.","stoppingDistanceSection"],["Tyre Temperature","Analyze inside/middle/outside tread temperature balance.","tyreTemperatureSection"]]} ,
+  {category:"Suspension", icon:"🔩", tools:[["Spring Rate","Calculate effective wheel rate from spring rate and motion ratio.","springRateSection"],["Wheel Rate","Calculate wheel rate from spring rate and motion ratio.","wheelRateSection"],["Ride Frequency","Estimate suspension natural frequency.","rideFrequencySection"],["Damper","Estimate critical and target damping coefficients.","damperSection"],["Roll Stiffness","Estimate axle and total roll stiffness.","rollStiffnessSection"],["CG Height","Estimate CG height from measured load transfer.","cgHeightSection"]]} ,
+  {category:"Powertrain", icon:"⚙️", tools:[["Gear Ratio","Calculate wheel RPM and theoretical vehicle speed.","gearRatioSection"],["Fuel Consumption","Estimate fuel per lap, session use and remaining fuel.","fuelConsumptionSection"]]} ,
+  {category:"Telemetry & Race Analysis", icon:"📡", tools:[["Speed Telemetry","View the speed trace from the active session.","speedTelemetry"],["Lap Comparison","Compare current lap, best lap and delta.","lapComparisonPanel"],["Performance Analysis","Review completed laps, average, fastest lap and consistency.","performanceAnalysis"],["Race Insights","Live rule-based interpretation of vehicle telemetry.","raceInsights"],["AI Race Engineer","Receive telemetry-based engineering guidance.","aiRaceEngineerPanel"]]}
+];
+let activeToolCategory = "All";
+
 function setMainView(view) {
+  const allTools = document.getElementById("allToolsSection");
   const rulebook = document.getElementById("rulebookSection");
   const mainContent = document.querySelectorAll(".cards, .telemetry-section, .calculator-section, .status, .timer, #sessionButton, .session-controls, .tool-category-title");
-  mainContent.forEach(el => { el.hidden = view === "rulebooks"; });
+  mainContent.forEach(el => { el.hidden = view !== "engineer"; });
   if (rulebook) rulebook.hidden = view !== "rulebooks";
+  if (allTools) allTools.hidden = view !== "all-tools";
   document.querySelectorAll(".main-tab").forEach(tab => tab.classList.toggle("active", tab.dataset.view === view));
+  if (view === "all-tools") renderToolbox();
   window.scrollTo({top:0, behavior:"smooth"});
 }
 
-function renderRulebooks() {
-  const grid=document.getElementById("rulebookGrid");
-  const search=(document.getElementById("rulebookSearch")?.value||"").trim().toLowerCase();
-  const series=document.getElementById("rulebookSeries")?.value||"all";
-  const filtered=RULEBOOKS.filter(r => {
-    const hay=[r.series,r.title,r.version,r.description,...r.tags].join(" ").toLowerCase();
-    return (series==="all" || r.id===series) && (!search || hay.includes(search));
-  });
-  grid.innerHTML=filtered.length ? filtered.map(r => `
-    <article class="rulebook-card">
-      <span class="series">${r.series}</span>
-      <h3>${r.title}</h3>
-      <p>${r.description}</p>
-      <div class="rulebook-meta"><span class="rulebook-tag">${r.version}</span>${r.tags.slice(0,3).map(t=>`<span class="rulebook-tag">${t}</span>`).join("")}</div>
-      <div class="rulebook-actions">
-        <a href="${r.url}" target="_blank" rel="noopener noreferrer">Open Rulebook</a>
-        <a class="secondary" href="${r.official}" target="_blank" rel="noopener noreferrer">Official Hub</a>
-      </div>
-    </article>`).join("") : '<div class="rulebook-empty">No matching rulebook topics found.</div>';
+function renderToolbox() {
+  const grid=document.getElementById("allToolsGrid");
+  const chips=document.getElementById("toolCategoryChips");
+  if (!grid || !chips) return;
+  const search=(document.getElementById("allToolsSearch")?.value||"").trim().toLowerCase();
+  const categories=["All", ...TOOLBOX.map(c=>c.category)];
+  chips.innerHTML=categories.map(c=>'<button type="button" class="tool-chip ' + (activeToolCategory===c?"active":"") + '" data-tool-category="' + c + '">' + (c==="All"?"✨":TOOLBOX.find(x=>x.category===c)?.icon||"") + " " + c + "</button>").join("");
+  const tools=TOOLBOX.flatMap(group=>group.tools.map(t=>({group:group,name:t[0],description:t[1],target:t[2]}))).filter(t=>activeToolCategory==="All" || t.group.category===activeToolCategory).filter(t=>!search || [t.name,t.description,t.group.category].join(" ").toLowerCase().includes(search));
+  document.getElementById("allToolsCount").textContent=tools.length + " TOOL" + (tools.length===1?"":"S");
+  grid.innerHTML=tools.length ? tools.map(t=>'<article class="tool-card"><div class="tool-card-top"><span class="tool-card-category">' + t.group.icon + " " + t.group.category + '</span><span class="tool-card-arrow">↗</span></div><h3>' + t.name + '</h3><p>' + t.description + '</p><button type="button" class="open-tool-button" data-tool-target="' + t.target + '">Open Tool</button></article>').join("") : '<div class="tool-empty">No tools match that search. Try a category or a broader term.</div>';
+}
+
+function openTool(target) {
+  setMainView("engineer");
+  setTimeout(() => {
+    const section=document.getElementById(target);
+    if (!section) return;
+    document.querySelectorAll(".calculator-section, .telemetry-section").forEach(el => el.hidden=true);
+    document.querySelectorAll(".tool-category-title").forEach(el=>el.remove());
+    section.hidden=false;
+    section.scrollIntoView({behavior:"smooth", block:"start"});
+  }, 50);
 }
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("rulebookSection")?.setAttribute("hidden", "");
@@ -59,4 +75,7 @@ document.addEventListener("DOMContentLoaded", () => {
   setMainView("engineer");
   document.getElementById("rulebookSearch")?.addEventListener("input", renderRulebooks);
   document.getElementById("rulebookSeries")?.addEventListener("change", renderRulebooks);
+  document.getElementById("allToolsSearch")?.addEventListener("input", renderToolbox);
+  document.getElementById("toolCategoryChips")?.addEventListener("click", event => { const chip=event.target.closest("[data-tool-category]"); if (!chip) return; activeToolCategory=chip.dataset.toolCategory; renderToolbox(); });
+  document.getElementById("allToolsGrid")?.addEventListener("click", event => { const button=event.target.closest("[data-tool-target]"); if (button) openTool(button.dataset.toolTarget); });
 });
