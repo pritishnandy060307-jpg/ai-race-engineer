@@ -14,6 +14,27 @@ const RULEBOOKS = [
     official:"https://www.fia.com/regulation/category/2182"
   },
   {
+    id:"nascar", series:"NASCAR", title:"NASCAR 2026 Competition & Technical Rules",
+    version:"2026 • NASCAR Cup / National Series", description:"NASCAR competition and technical rules, including 2026 technical updates and series procedures. The official NASCAR source should be checked for the latest revision and applicable series package.",
+    tags:["Stock Car","Cup","Technical","Sporting"],
+    url:"https://www.nascar.com/news-media/2025/11/14/nascar-2026-rule-book-technical-updates/",
+    official:"https://www.nascar.com/"
+  },
+  {
+    id:"indycar", series:"INDYCAR", title:"NTT INDYCAR SERIES Rulebook",
+    version:"2026 • Rulebook", description:"Official 2026 NTT INDYCAR SERIES Rulebook covering sporting, technical, safety, aero, powertrain and event regulations.",
+    tags:["Open Wheel","Technical","Aero","Hybrid"],
+    url:"https://epaddock.indycar.com/docs/default-source/rules-regulations-and-policies/2026-indycar-rulebook.pdf?sfvrsn=56785b60_42",
+    official:"https://www.indycar.com/Fan-Info/INDYCAR-101"
+  },
+  {
+    id:"daytona", series:"Daytona", title:"Daytona International Speedway",
+    version:"2026 • Daytona / Superspeedway", description:"Daytona-specific reference for the 2.5-mile superspeedway, including official NASCAR event information and current Daytona Cup rules-package updates.",
+    tags:["2.5 mi","Superspeedway","NASCAR","Aero Package"],
+    url:"https://www.nascar.com/news-media/2026/07/15/nascar-announces-rule-changes-for-summer-cup-race-at-daytona/",
+    official:"https://www.nascar.com/nascar-tracks/daytona-international-speedway/"
+  },
+  {
     id:"fe", series:"Formula E", title:"FIA Formula E Regulations",
     version:"2026–2027 • Season 13", description:"Current FIA Formula E regulation hub, including Sporting Regulations and Technical Regulations for the 2026–2027 season.",
     tags:["Sporting","Technical","2026–27","FIA"],
