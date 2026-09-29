@@ -60,7 +60,7 @@ function renderToolbox() {
 function openTool(target) {
   setMainView("engineer");
   setTimeout(() => {
-    const section=document.getElementById(target);
+    const section=target==="speedTelemetry" ? document.getElementById("speedChart")?.closest(".telemetry-section") : document.getElementById(target);
     if (!section) return;
     document.querySelectorAll(".calculator-section, .telemetry-section").forEach(el => el.hidden=true);
     document.querySelectorAll(".tool-category-title").forEach(el=>el.remove());
