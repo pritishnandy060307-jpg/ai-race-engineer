@@ -87,12 +87,13 @@ function updateTrack(t){
 }
 
 function connectWebSocket(){
+ window.externalTelemetryActive=true;
  disconnectTelemetry(); const url=document.getElementById("telemetryWsUrl").value.trim();
  try{socket=new WebSocket(url);socket.onopen=()=>{show("telemetrySourceBadge","WEBSOCKET LIVE");show("spatialStatus","WAITING DATA")};socket.onmessage=e=>{try{applyTelemetry(JSON.parse(e.data),"WEBSOCKET LIVE")}catch{}};socket.onclose=()=>show("telemetrySourceBadge","WEBSOCKET OFFLINE");socket.onerror=()=>show("telemetrySourceBadge","WEBSOCKET ERROR")}catch{show("telemetrySourceBadge","INVALID URL")}
 }
-function disconnectTelemetry(){if(socket){socket.close();socket=null}if(playbackTimer){clearInterval(playbackTimer);playbackTimer=null}}
+function disconnectTelemetry(){if(socket){socket.close();socket=null}if(playbackTimer){clearInterval(playbackTimer);playbackTimer=null}window.externalTelemetryActive=false}
 function parseCsv(text){const lines=text.trim().split(/\\r?\\n/).filter(Boolean);if(lines.length<2)return[];const headers=lines[0].split(",").map(x=>x.trim());return lines.slice(1).map(line=>{const values=line.split(",");const row={};headers.forEach((h,i)=>row[h]=values[i]?.trim());return row})}
-function startCsv(file){const reader=new FileReader();reader.onload=()=>{csvRows=parseCsv(reader.result);csvIndex=0;disconnectTelemetry();playbackTimer=setInterval(()=>{if(csvIndex>=csvRows.length){clearInterval(playbackTimer);playbackTimer=null;return}applyTelemetry(csvRows[csvIndex++],"CSV REPLAY")},200)};reader.readAsText(file)}
+function startCsv(file){window.externalTelemetryActive=true;const reader=new FileReader();reader.onload=()=>{csvRows=parseCsv(reader.result);csvIndex=0;disconnectTelemetry();playbackTimer=setInterval(()=>{if(csvIndex>=csvRows.length){clearInterval(playbackTimer);playbackTimer=null;return}applyTelemetry(csvRows[csvIndex++],"CSV REPLAY")},200)};reader.readAsText(file)}
 
 function integratedModel(){
  const m=num("imMass"),r=num("imRadius"),mu=num("imMu"),cl=num("imCl"),A=num("imArea"),rho=num("imRho"),speed=num("imSpeed"),frontAero=num("imFrontAero"),decel=num("imBrakeG"),h=num("imCg"),L=num("imWheelbase"),frontStatic=num("imStaticFront");
@@ -117,7 +118,7 @@ function exportJson(data,name){const blob=new Blob([JSON.stringify(data,null,2)]
 document.addEventListener("DOMContentLoaded",()=>{
  createUpgrades();renderSetups();
  document.getElementById("telemetrySource").addEventListener("change",e=>{document.getElementById("telemetryWsUrl").disabled=e.target.value!=="websocket";document.getElementById("telemetryCsv").disabled=e.target.value!=="csv"});
- document.getElementById("connectTelemetry").onclick=()=>{const source=document.getElementById("telemetrySource").value;if(source==="websocket")connectWebSocket();else if(source==="csv"){const f=document.getElementById("telemetryCsv").files[0];if(f)startCsv(f);else show("telemetrySourceBadge","SELECT CSV")}else{disconnectTelemetry();show("telemetrySourceBadge","DEMO SIMULATION");}};
+ document.getElementById("connectTelemetry").onclick=()=>{const source=document.getElementById("telemetrySource").value;if(source==="websocket")connectWebSocket();else if(source==="csv"){const f=document.getElementById("telemetryCsv").files[0];if(f)startCsv(f);else show("telemetrySourceBadge","SELECT CSV")}else{disconnectTelemetry();window.externalTelemetryActive=false;show("telemetrySourceBadge","DEMO SIMULATION");}};
  document.getElementById("disconnectTelemetry").onclick=disconnectTelemetry;
  document.getElementById("calculateIntegrated").onclick=integratedModel;
  document.getElementById("saveSetup").onclick=saveSetup;
