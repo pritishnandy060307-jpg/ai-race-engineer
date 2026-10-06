@@ -132,7 +132,7 @@ function setupCharts() {
 }
 
 
-export function updateTelemetryCharts(telemetry, timeSeconds) {
+function updateTelemetryCharts(telemetry, timeSeconds) {
     if (typeof Chart === "undefined" || !telemetry) return;
     if (!telemetryCharts.length) setupCharts();
     if (!telemetryCharts.length) return;
@@ -152,7 +152,7 @@ export function updateTelemetryCharts(telemetry, timeSeconds) {
     telemetryCharts.forEach(chart => chart.update("none"));
 }
 
-export function clearTelemetryCharts() {
+function clearTelemetryCharts() {
     Object.values(chartState).forEach(values => values.length = 0);
     telemetryCharts.forEach(chart => chart.update("none"));
 }
