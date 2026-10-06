@@ -16,7 +16,6 @@ function ensureWeightTransferSection() {
 ensureWeightTransferSection();
 
 const button = document.querySelector("#sessionButton");
-const speedChartCanvas = document.querySelector("#speedChart");
 const calculateGearButton = document.querySelector("#calculateGearButton");
 const calculateInflationButton = document.querySelector("#calculateInflationButton");
 const calculateTurbulenceButton = document.querySelector("#calculateTurbulenceButton");
@@ -31,11 +30,6 @@ const calculateWeightTransferButton = document.querySelector("#calculateWeightTr
 
 let sessionTimer = null;
 let telemetryTimer = null;
-const chartData = { labels: [], speed: [] };
-let chart = null;
-if (speedChartCanvas && typeof Chart !== "undefined") {
-    chart = new Chart(speedChartCanvas, { type: "line", data: { labels: chartData.labels, datasets: [{ label: "Speed (km/h)", data: chartData.speed, borderWidth: 2, tension: 0.25, pointRadius: 0 }] }, options: { responsive: true, maintainAspectRatio: false, animation: false, scales: { x: { title: { display: true, text: "Time (s)" } }, y: { title: { display: true, text: "Speed (km/h)" }, beginAtZero: true } } } });
-}
 
 button?.addEventListener("click", toggleSession);
 calculateGearButton?.addEventListener("click", calculateGear);
@@ -97,9 +91,25 @@ function filterTools(category) {
 setupNavigation();
 
 function toggleSession() { if (raceState.session.active) endSession(); else startSession(); }
-function startSession() { resetRaceState(); raceState.session.active = true; raceState.session.status = "SESSION ACTIVE"; clearChartHistory(); resetSessionUI(); setSessionStatus(true); sessionTimer = setInterval(tickSession, 100); telemetryTimer = setInterval(updateTelemetry, 500); }
+function startSession() {
+    resetRaceState();
+    raceState.session.active = true;
+    raceState.session.status = "SESSION ACTIVE";
+    window.clearTelemetryCharts?.();
+    resetSessionUI();
+    setSessionStatus(true);
+    sessionTimer = setInterval(tickSession, 100);
+    telemetryTimer = setInterval(updateTelemetry, 500);
+}
 function endSession() { raceState.session.active = false; raceState.session.status = "OFFLINE"; clearInterval(sessionTimer); clearInterval(telemetryTimer); sessionTimer = null; telemetryTimer = null; setSessionStatus(false); }
 function tickSession() { raceState.session.elapsedSeconds = Number((raceState.session.elapsedSeconds + 0.1).toFixed(1)); updateSessionUI(raceState); }
-function updateTelemetry() { if (window.externalTelemetryActive) return; const telemetry = generateTelemetry(raceState.session.elapsedSeconds); raceState.telemetry.current = telemetry; window.raceTelemetry = telemetry; updateTelemetryUI(telemetry); updateChart(telemetry); }
+function updateTelemetry() {
+    if (window.externalTelemetryActive) return;
+    const telemetry = generateTelemetry(raceState.session.elapsedSeconds);
+    raceState.telemetry.current = telemetry;
+    window.raceTelemetry = telemetry;
+    updateTelemetryUI(telemetry);
+    window.updateTelemetryCharts?.(telemetry, raceState.session.elapsedSeconds);
+}
 function updateChart(telemetry) { if (!chart) return; const t = raceState.session.elapsedSeconds; chartData.labels.push(t.toFixed(1)); chartData.speed.push(telemetry.speedKmh); if (chartData.labels.length > 120) { chartData.labels.shift(); chartData.speed.shift(); } chart.update("none"); }
 function clearChartHistory() { chartData.labels.length = 0; chartData.speed.length = 0; chart?.update("none"); }
