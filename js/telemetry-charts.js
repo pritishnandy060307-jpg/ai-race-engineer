@@ -10,7 +10,6 @@ const chartState = {
 };
 
 let telemetryCharts = [];
-let telemetryTimer = null;
 
 function clearChartHistory() {
     Object.values(chartState).forEach(values => values.length = 0);
@@ -120,54 +119,46 @@ function setupCharts() {
         }
     });
 
-    telemetryCharts = [rpm, gear, steering, combined, gg];
+    const speedCanvas = document.getElementById("speedChart");
+    const speed = speedCanvas ? new Chart(speedCanvas, {
+        type: "line",
+        data: { labels: chartState.labels, datasets: [{ label: "Speed (km/h)", data: chartState.speed, borderWidth: 2, tension: 0.25, pointRadius: 0 }] },
+        options: { ...common, scales: { x: { title: { display: true, text: "Session Time (s)" } }, y: { title: { display: true, text: "Speed (km/h)" }, beginAtZero: true } } }
+    }) : null;
+
+    telemetryCharts = [speed, rpm, gear, steering, combined, gg].filter(Boolean);
     document.getElementById("clearTelemetryCharts")?.addEventListener("click", clearChartHistory);
     return telemetryCharts;
 }
 
-function startTelemetryCharts() {
-    if (typeof Chart === "undefined" || telemetryTimer) return;
 
-    setupCharts();
+export function updateTelemetryCharts(telemetry, timeSeconds) {
+    if (typeof Chart === "undefined" || !telemetry) return;
+    if (!telemetryCharts.length) setupCharts();
     if (!telemetryCharts.length) return;
-
-    telemetryTimer = setInterval(() => {
-        const status = document.getElementById("sessionStatus")?.textContent?.trim() || "";
-        if (!status.includes("ACTIVE")) return;
-
-        const telemetry = window.raceTelemetry;
-        if (!telemetry) return;
-
-        const time = Number(document.getElementById("sessionTimer")?.dataset?.seconds);
-        const fallbackTime = chartState.labels.length ? Number(chartState.labels.at(-1)) + 0.5 : 0;
-        const t = Number.isFinite(time) ? time : fallbackTime;
-
-        chartState.labels.push(t.toFixed(1));
-        chartState.rpm.push(telemetry.rpm);
-        chartState.gear.push(telemetry.gear);
-        chartState.steering.push(telemetry.steeringDeg);
-        chartState.speed.push(telemetry.speedKmh);
-        chartState.throttle.push(telemetry.throttlePercent);
-        chartState.brake.push(telemetry.brakePercent);
-        chartState.gg.push({ x: telemetry.lateralG, y: telemetry.longitudinalG });
-
-        if (chartState.labels.length > 120) {
-            chartState.labels.shift();
-            chartState.rpm.shift();
-            chartState.gear.shift();
-            chartState.steering.shift();
-            chartState.speed.shift();
-            chartState.throttle.shift();
-            chartState.brake.shift();
-            chartState.gg.shift();
-        }
-
-        telemetryCharts.forEach(chart => chart.update("none"));
-    }, 500);
+    const t = Number.isFinite(Number(timeSeconds)) ? Number(timeSeconds) : (chartState.labels.length ? Number(chartState.labels.at(-1)) + 0.5 : 0);
+    chartState.labels.push(t.toFixed(1));
+    chartState.rpm.push(telemetry.rpm);
+    chartState.gear.push(telemetry.gear);
+    chartState.steering.push(telemetry.steeringDeg);
+    chartState.speed.push(telemetry.speedKmh);
+    chartState.throttle.push(telemetry.throttlePercent);
+    chartState.brake.push(telemetry.brakePercent);
+    chartState.gg.push({ x: telemetry.lateralG, y: telemetry.longitudinalG });
+    if (chartState.labels.length > 120) {
+        chartState.labels.shift(); chartState.rpm.shift(); chartState.gear.shift(); chartState.steering.shift();
+        chartState.speed.shift(); chartState.throttle.shift(); chartState.brake.shift(); chartState.gg.shift();
+    }
+    telemetryCharts.forEach(chart => chart.update("none"));
 }
 
-if (document.readyState === "loading") {
-    document.addEventListener("DOMContentLoaded", startTelemetryCharts, { once: true });
-} else {
-    startTelemetryCharts();
+export function clearTelemetryCharts() {
+    Object.values(chartState).forEach(values => values.length = 0);
+    telemetryCharts.forEach(chart => chart.update("none"));
 }
+
+if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", setupCharts, { once: true });
+else setupCharts();
+
+window.updateTelemetryCharts = updateTelemetryCharts;
+window.clearTelemetryCharts = clearTelemetryCharts;
