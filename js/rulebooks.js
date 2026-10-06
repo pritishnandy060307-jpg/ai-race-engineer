@@ -57,43 +57,76 @@ let activeToolCategory = "All";
 function setMainView(view) {
   const allTools = document.getElementById("allToolsSection");
   const rulebook = document.getElementById("rulebookSection");
-  const mainContent = document.querySelectorAll(".cards, .telemetry-section, .calculator-section, .status, .timer, #sessionButton, .session-controls, .tool-category-title");
-  mainContent.forEach(el => { el.hidden = view !== "engineer"; });
-  if (rulebook) rulebook.hidden = view !== "rulebooks";
-  if (allTools) allTools.hidden = view !== "all-tools";
+  const cards = document.querySelector(".cards");
+  const sessionControls = document.querySelector(".session-controls");
+  const toolNavigation = document.querySelector("#toolNavigation");
+  const mainContent = document.querySelectorAll(".cards, .telemetry-section, .calculator-section, .status, .timer, #sessionButton, .session-controls, .engineering-upgrades, .tool-category-title");
+
+  mainContent.forEach(el => { el.hidden = true; });
+  if (allTools) allTools.hidden = true;
+  if (rulebook) rulebook.hidden = true;
+  if (toolNavigation) toolNavigation.hidden = true;
+
+  if (view === "dashboard") {
+    if (cards) cards.hidden = false;
+    if (sessionControls) sessionControls.hidden = false;
+  }
+
+  if (view === "setup") {
+    document.getElementById("telemetrySourcePanel")?.removeAttribute("hidden");
+    document.getElementById("setupManagerPanel")?.removeAttribute("hidden");
+    document.getElementById("integratedModelPanel")?.removeAttribute("hidden");
+    document.querySelector(".engineering-upgrades")?.removeAttribute("hidden");
+    if (sessionControls) sessionControls.hidden = false;
+  }
+
+  if (view === "telemetry") {
+    document.querySelectorAll(".telemetry-section").forEach(el => { el.hidden = false; });
+    document.getElementById("telemetrySourcePanel")?.removeAttribute("hidden");
+    document.querySelector(".engineering-upgrades")?.removeAttribute("hidden");
+  }
+
+  if (view === "analysis") {
+    ["trackAnalysisPanel", "lapComparisonPanel", "performanceAnalysis", "raceInsights", "aiRaceEngineerPanel"].forEach(id => {
+      document.getElementById(id)?.removeAttribute("hidden");
+    });
+    document.querySelector(".engineering-upgrades")?.removeAttribute("hidden");
+    document.querySelectorAll(".insights-section, .performance-analysis-section, .lap-comparison-section, .ai-race-engineer-section").forEach(el => { el.hidden = false; });
+  }
+
+  if (view === "engineering-tools") {
+    if (allTools) allTools.hidden = false;
+    if (toolNavigation) toolNavigation.hidden = false;
+    renderToolbox();
+  }
+
+  if (view === "rulebooks") {
+    if (rulebook) rulebook.hidden = false;
+  }
+
   document.querySelectorAll(".main-tab").forEach(tab => tab.classList.toggle("active", tab.dataset.view === view));
-  if (view === "all-tools") renderToolbox();
   window.scrollTo({top:0, behavior:"smooth"});
 }
 
-function renderToolbox() {
-  const grid=document.getElementById("allToolsGrid");
-  const chips=document.getElementById("toolCategoryChips");
-  if (!grid || !chips) return;
-  const search=(document.getElementById("allToolsSearch")?.value||"").trim().toLowerCase();
-  const categories=["All", ...TOOLBOX.map(c=>c.category)];
-  chips.innerHTML=categories.map(c=>'<button type="button" class="tool-chip ' + (activeToolCategory===c?"active":"") + '" data-tool-category="' + c + '">' + (c==="All"?"✨":TOOLBOX.find(x=>x.category===c)?.icon||"") + " " + c + "</button>").join("");
-  const tools=TOOLBOX.flatMap(group=>group.tools.map(t=>({group:group,name:t[0],description:t[1],target:t[2]}))).filter(t=>activeToolCategory==="All" || t.group.category===activeToolCategory).filter(t=>!search || [t.name,t.description,t.group.category].join(" ").toLowerCase().includes(search));
-  document.getElementById("allToolsCount").textContent=tools.length + " TOOL" + (tools.length===1?"":"S");
-  grid.innerHTML=tools.length ? tools.map(t=>'<article class="tool-card"><div class="tool-card-top"><span class="tool-card-category">' + t.group.icon + " " + t.group.category + '</span><span class="tool-card-arrow">↗</span></div><h3>' + t.name + '</h3><p>' + t.description + '</p><button type="button" class="open-tool-button" data-tool-target="' + t.target + '">Open Tool</button></article>').join("") : '<div class="tool-empty">No tools match that search. Try a category or a broader term.</div>';
+function showEngineeringTool(target) {
+  setMainView("engineering-tools");
+  const allTools = document.getElementById("allToolsSection");
+  if (allTools) allTools.hidden = true;
+  document.querySelectorAll(".calculator-section, .telemetry-section").forEach(el => { el.hidden = true; });
+  document.querySelectorAll(".tool-category-title").forEach(el => el.remove());
+  const section = target === "speedTelemetry"
+    ? document.getElementById("speedChart")?.closest(".telemetry-section")
+    : document.getElementById(target);
+  if (!section) return;
+  section.hidden = false;
+  section.scrollIntoView({behavior:"smooth", block:"start"});
 }
 
-function openTool(target) {
-  setMainView("engineer");
-  setTimeout(() => {
-    const section=target==="speedTelemetry" ? document.getElementById("speedChart")?.closest(".telemetry-section") : document.getElementById(target);
-    if (!section) return;
-    document.querySelectorAll(".calculator-section, .telemetry-section").forEach(el => el.hidden=true);
-    document.querySelectorAll(".tool-category-title").forEach(el=>el.remove());
-    section.hidden=false;
-    section.scrollIntoView({behavior:"smooth", block:"start"});
-  }, 50);
-}
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("rulebookSection")?.setAttribute("hidden", "");
   document.querySelectorAll(".main-tab").forEach(tab => tab.addEventListener("click", () => setMainView(tab.dataset.view)));
   renderRulebooks();
-  setMainView("engineer");
+  showEngineeringTool(target);
   document.getElementById("rulebookSearch")?.addEventListener("input", renderRulebooks);
   document.getElementById("rulebookSeries")?.addEventListener("change", renderRulebooks);
   document.getElementById("allToolsSearch")?.addEventListener("input", renderToolbox);
