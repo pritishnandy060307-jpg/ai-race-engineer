@@ -63,6 +63,7 @@ function setMainView(view) {
   const mainContent = document.querySelectorAll(".cards, .telemetry-section, .calculator-section, .status, .timer, #sessionButton, .session-controls, .engineering-upgrades, .tool-category-title");
 
   mainContent.forEach(el => { el.hidden = true; });
+  document.querySelectorAll(".engineering-upgrades > .upgrade-panel").forEach(el => { el.hidden = true; });
   if (allTools) allTools.hidden = true;
   if (rulebook) rulebook.hidden = true;
   if (toolNavigation) toolNavigation.hidden = true;
