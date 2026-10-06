@@ -108,6 +108,8 @@ function setMainView(view) {
   window.scrollTo({top:0, behavior:"smooth"});
 }
 
+function openTool(target) { showEngineeringTool(target); }
+
 function showEngineeringTool(target) {
   setMainView("engineering-tools");
   const allTools = document.getElementById("allToolsSection");
@@ -126,7 +128,7 @@ document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("rulebookSection")?.setAttribute("hidden", "");
   document.querySelectorAll(".main-tab").forEach(tab => tab.addEventListener("click", () => setMainView(tab.dataset.view)));
   renderRulebooks();
-  showEngineeringTool(target);
+  requestAnimationFrame(() => setMainView("dashboard"));
   document.getElementById("rulebookSearch")?.addEventListener("input", renderRulebooks);
   document.getElementById("rulebookSeries")?.addEventListener("change", renderRulebooks);
   document.getElementById("allToolsSearch")?.addEventListener("input", renderToolbox);
