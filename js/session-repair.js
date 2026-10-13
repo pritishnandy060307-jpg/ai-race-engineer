@@ -16,6 +16,7 @@ function clearTimers() {
 function startSession() {
     clearTimers();
     resetRaceState();
+    window.clearTelemetryCharts?.();
     raceState.session.active = true;
     raceState.session.status = "SESSION ACTIVE";
     resetSessionUI();
@@ -30,8 +31,10 @@ function startSession() {
     telemetryTimer = setInterval(() => {
         if (!raceState.session.active) return;
         const telemetry = generateTelemetry(raceState.session.elapsedSeconds);
-        raceState.telemetry = telemetry;
+        raceState.telemetry.current = telemetry;
+        window.raceTelemetry = telemetry;
         updateTelemetryUI(telemetry);
+        window.updateTelemetryCharts?.(telemetry, raceState.session.elapsedSeconds);
     }, 500);
 }
 
