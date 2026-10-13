@@ -187,6 +187,7 @@ function loadDataset() {
   state.mappings = mapping;
   state.loadedRows = normalized;
   renderImportedCharts(normalized);
+  const advancedChartsLoaded = typeof window.loadTelemetryChartDataset === "function" && window.loadTelemetryChartDataset(normalized);
   const times = normalized.map(row => row.timeSeconds);
   const speeds = normalized.map(row => row.speedKmh);
   const duration = times[times.length - 1] - times[0];
@@ -202,7 +203,9 @@ function loadDataset() {
     summary.innerHTML += "<span>For lap comparison, map both Lap number and Lap time (seconds). Imported traces are shown separately from live demo telemetry.</span>";
   }
   document.getElementById("telemetryImportStatus").textContent = "DATA LOADED";
-  showMessage("Dataset loaded locally. The imported charts below use your file; live demo telemetry remains separate.");
+  showMessage(advancedChartsLoaded
+    ? "Dataset loaded locally. The advanced telemetry charts and imported-data charts now show your file; dashboard cards and session simulation remain separate."
+    : "Dataset loaded locally. The imported-data charts below show your file; advanced chart integration is not ready yet.");
 }
 function buildLapRecords(rows) {
   if (state.mappings.lap === null || state.mappings.lapTime === null) return [];
