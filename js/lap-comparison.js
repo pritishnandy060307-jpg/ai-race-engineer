@@ -168,7 +168,10 @@ function captureSample() {
         gear: numeric(telemetry.gear) ?? 0,
         steeringDeg: numeric(telemetry.steeringDeg ?? telemetry.steering) ?? 0,
         lateralG: numeric(telemetry.lateralG) ?? 0,
-        longitudinalG: numeric(telemetry.longitudinalG) ?? 0
+        longitudinalG: numeric(telemetry.longitudinalG) ?? 0,
+        distanceM: numeric(telemetry.distanceM ?? telemetry.distance),
+        latitude: numeric(telemetry.latitude ?? telemetry.lat),
+        longitude: numeric(telemetry.longitude ?? telemetry.lon)
     });
     state.lastSampleElapsed = elapsed;
 }
@@ -325,6 +328,18 @@ function clearLaps() {
     const message = document.getElementById("lapCompareMessage");
     if (message) message.textContent = "Captured laps cleared. Complete new laps to build a fresh comparison.";
 }
+
+// Read-only snapshot API for analysis modules. Callers receive copies so they
+// cannot mutate the recorder's canonical lap history.
+window.getLapComparisonData = () => state.laps.map(lap => ({
+    number: lap.number,
+    timeSeconds: lap.timeSeconds,
+    topSpeedKmh: lap.topSpeedKmh,
+    averageSpeedKmh: lap.averageSpeedKmh,
+    peakBrakePercent: lap.peakBrakePercent,
+    sampleCount: lap.sampleCount,
+    samples: lap.samples.map(sample => ({ ...sample }))
+}));
 
 function initLapComparison() {
     injectStyles();
