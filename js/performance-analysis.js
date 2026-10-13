@@ -154,10 +154,13 @@ function updatePanel() {
         resetPanel();
     }
     state.lastElapsed = elapsed;
-    const times = Array.isArray(raceState.lap.completedTimes)
+    let times = Array.isArray(raceState.lap.completedTimes)
         ? raceState.lap.completedTimes.map(Number).filter(value => Number.isFinite(value) && value > 0)
         : [];
     const laps = typeof window.getLapComparisonData === "function" ? window.getLapComparisonData() : [];
+    if (!times.length && laps.some(lap => lap.source === "imported")) {
+        times = laps.filter(lap => lap.source === "imported").map(lap => Number(lap.timeSeconds)).filter(value => Number.isFinite(value) && value > 0);
+    }
     const key = `${times.length}:${laps.map(lap => `${lap.number}-${lap.sampleCount}`).join(",")}`;
     if (key === state.lastRenderKey) return;
     state.lastRenderKey = key;
