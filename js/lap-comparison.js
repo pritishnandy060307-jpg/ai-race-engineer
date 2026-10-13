@@ -299,11 +299,11 @@ function exportComparison() {
         if (message) message.textContent = "Capture at least one completed lap and select it in both fields before exporting.";
         return;
     }
-    const header = ["lap", "lap_time_s", "lap_progress_percent", "lap_time_at_sample_s", "speed_kmh", "throttle_percent", "brake_percent", "rpm", "gear", "steering_deg", "lateral_g", "longitudinal_g"];
+    const header = ["lap", "lap_time_s", "lap_progress_percent", "lap_time_at_sample_s", "speed_kmh", "throttle_percent", "brake_percent", "rpm", "gear", "steering_deg", "lateral_g", "longitudinal_g", "distance_m", "latitude", "longitude"];
     const rows = [header];
     for (const lap of [a, b]) {
         for (const sample of lap.samples) {
-            rows.push([lap.number, lap.timeSeconds, sample.progressPercent.toFixed(2), sample.lapTimeSeconds.toFixed(3), sample.speedKmh, sample.throttlePercent, sample.brakePercent, sample.rpm, sample.gear, sample.steeringDeg, sample.lateralG, sample.longitudinalG]);
+            rows.push([lap.number, lap.timeSeconds, sample.progressPercent.toFixed(2), sample.lapTimeSeconds.toFixed(3), sample.speedKmh, sample.throttlePercent, sample.brakePercent, sample.rpm, sample.gear, sample.steeringDeg, sample.lateralG, sample.longitudinalG, sample.distanceM, sample.latitude, sample.longitude]);
         }
     }
     const csv = rows.map(row => row.map(value => {
