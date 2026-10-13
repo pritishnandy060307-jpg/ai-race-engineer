@@ -2,7 +2,6 @@ import "./session-repair.js?v=1";
 import "./tyre-temperature.js?v=1";
 import "./suspension-tools.js?v=1";
 import "./fuel-consumption.js?v=1";
-import "./telemetry-charts.js?v=1";
 import "./race-insights.js?v=1";
 import "./phase2-dashboard.js?v=1";
 import "./performance-analysis.js?v=1";
