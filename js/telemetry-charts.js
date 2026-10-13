@@ -218,6 +218,7 @@ function setupCharts() {
         ] },
         options: {
             ...common,
+            normalized: false,
             interaction: { mode: "nearest", intersect: false },
             scales: {
                 x: axis("Lateral G", { type: "linear", min: -1.8, max: 1.8 }),
