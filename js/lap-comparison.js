@@ -10,7 +10,8 @@ const state = {
     lastSampleElapsed: -Infinity,
     lastLapNumber: null,
     lastSessionElapsed: 0,
-    chart: null
+    chart: null,
+    importedMode: false
 };
 
 function injectStyles() {
@@ -134,6 +135,7 @@ function captureSample() {
     const lapNumber = Number(raceState.lap.number) || 1;
     if (elapsed < state.lastSessionElapsed || (elapsed === 0 && state.lastSessionElapsed > 0)) {
         state.laps = [];
+        state.importedMode = false;
         state.activeLap = null;
         state.lastLapNumber = null;
         state.lastSampleElapsed = -Infinity;
@@ -209,7 +211,7 @@ function refreshLapOptions() {
     const sorted = [...state.laps].sort((a, b) => a.number - b.number);
     const options = sorted.map(lap => ({
         value: String(lap.number),
-        label: `Lap ${lap.number} · ${formatTime(lap.timeSeconds)}`
+        label: `${lap.source === "imported" ? "Imported · " : ""}Lap ${lap.number} · ${formatTime(lap.timeSeconds)}`
     }));
     for (const select of [selectA, selectB]) {
         select.replaceChildren();
@@ -333,6 +335,7 @@ function clearLaps() {
 // cannot mutate the recorder's canonical lap history.
 window.getLapComparisonData = () => state.laps.map(lap => ({
     number: lap.number,
+    source: lap.source || "session",
     timeSeconds: lap.timeSeconds,
     topSpeedKmh: lap.topSpeedKmh,
     averageSpeedKmh: lap.averageSpeedKmh,
@@ -340,6 +343,19 @@ window.getLapComparisonData = () => state.laps.map(lap => ({
     sampleCount: lap.sampleCount,
     samples: lap.samples.map(sample => ({ ...sample }))
 }));
+window.loadImportedLapData = laps => {
+    state.laps = Array.isArray(laps) ? laps.map(lap => ({ ...lap, source: "imported", samples: lap.samples.map(sample => ({ ...sample })) })).sort((a, b) => a.number - b.number) : [];
+    state.activeLap = null;
+    state.importedMode = true;
+    refreshLapOptions();
+    const message = document.getElementById("lapCompareMessage");
+    if (message) message.textContent = "Imported lap data is selected for comparison. Starting a new live session resets the comparison to newly captured laps.";
+};
+window.clearImportedLapData = () => {
+    state.laps = state.laps.filter(lap => lap.source !== "imported");
+    state.importedMode = false;
+    refreshLapOptions();
+};
 
 function initLapComparison() {
     injectStyles();
