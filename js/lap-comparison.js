@@ -105,6 +105,11 @@ function finishLap(numberJustCompleted) {
     const official = numeric(times[numberJustCompleted - 1]);
     const samples = lap.samples.map(sample => ({ ...sample }));
     const duration = official ?? (samples[samples.length - 1].lapTimeSeconds);
+    // Normalize each trace to its own completed lap duration so faster/slower
+    // laps align on the same 0–100% horizontal axis.
+    samples.forEach(sample => {
+        sample.progressPercent = Math.max(0, Math.min(100, sample.lapTimeSeconds / Math.max(0.001, duration) * 100));
+    });
     const record = {
         number: numberJustCompleted,
         timeSeconds: duration,
