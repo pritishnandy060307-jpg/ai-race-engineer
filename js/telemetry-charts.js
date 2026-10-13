@@ -25,8 +25,10 @@ const chartState = {
 
 let telemetryCharts = [];
 let chartsReady = false;
+let importedDatasetActive = false;
 
 function clearChartHistory() {
+    importedDatasetActive = false;
     Object.values(chartState).forEach(values => { values.length = 0; });
     telemetryCharts.forEach(chart => chart.update("none"));
 }
@@ -246,7 +248,7 @@ function setupCharts() {
 }
 
 function updateTelemetryCharts(telemetry, timeSeconds) {
-    if (!telemetry || typeof Chart === "undefined") return;
+    if (importedDatasetActive || !telemetry || typeof Chart === "undefined") return;
     if (!chartsReady && !setupCharts().length) return;
 
     const parsedTime = Number(timeSeconds);
@@ -289,6 +291,36 @@ function updateTelemetryCharts(telemetry, timeSeconds) {
     telemetryCharts.forEach(chart => chart.update("none"));
 }
 
+function loadTelemetryChartDataset(rows) {
+    if (!Array.isArray(rows) || !rows.length || typeof Chart === "undefined") return false;
+    if (!chartsReady && !setupCharts().length) return false;
+    importedDatasetActive = true;
+    Object.values(chartState).forEach(values => { values.length = 0; });
+    const channelMap = [
+        ["speed", "speedKmh"], ["rpm", "rpm"], ["throttle", "throttlePercent"],
+        ["brake", "brakePercent"], ["gear", "gear"], ["steering", "steeringDeg"],
+        ["engineTemp", "engineTempC"], ["coolantTemp", "coolantTempC"],
+        ["oilTemp", "oilTempC"], ["batteryVoltage", "batteryVoltageV"],
+        ["batteryCurrent", "batteryCurrentA"], ["lateralG", "lateralG"],
+        ["longitudinalG", "longitudinalG"]
+    ];
+    for (const row of rows) {
+        const t = Number(row.timeSeconds);
+        chartState.timestamps.push(t);
+        chartState.labels.push(t.toFixed(2));
+        for (const [target, source] of channelMap) {
+            const value = Number(row[source]);
+            chartState[target].push(Number.isFinite(value) ? value : null);
+        }
+        if (Number.isFinite(row.lateralG) && Number.isFinite(row.longitudinalG)) {
+            chartState.ggHistory.push({ x: row.lateralG, y: row.longitudinalG, t });
+        }
+    }
+    if (chartState.ggHistory.length) chartState.ggCurrent.push(chartState.ggHistory[chartState.ggHistory.length - 1]);
+    telemetryCharts.forEach(chart => chart.update("none"));
+    return true;
+}
+
 if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", setupCharts, { once: true });
 } else {
@@ -297,3 +329,4 @@ if (document.readyState === "loading") {
 
 window.updateTelemetryCharts = updateTelemetryCharts;
 window.clearTelemetryCharts = clearChartHistory;
+window.loadTelemetryChartDataset = loadTelemetryChartDataset;
