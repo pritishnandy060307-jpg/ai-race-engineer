@@ -4,9 +4,9 @@ import "./suspension-tools.js?v=1";
 import "./fuel-consumption.js?v=1";
 import "./race-insights.js?v=1";
 import "./phase2-dashboard.js?v=1";
-import "./performance-analysis.js?v=1";
+import "./performance-analysis.js?v=2";
 import "./phase2-enhancements.js?v=1";
-import "./lap-comparison.js?v=2";
+import "./lap-comparison.js?v=3";
 import "./ai-race-engineer.js?v=1";
 
 function moveSessionControls() {
