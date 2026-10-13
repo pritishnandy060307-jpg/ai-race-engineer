@@ -94,8 +94,14 @@ function ensurePanel() {
     @media(max-width:700px){#${PANEL_ID} .import-mapping-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#${PANEL_ID} .imported-telemetry-charts{grid-template-columns:1fr}}
   `;
   document.head.appendChild(style);
-  const anchor = document.getElementById("advancedTelemetrySection") || document.getElementById("speedChart")?.closest(".telemetry-section") || document.querySelector(".cards");
-  anchor?.after(section);
+  const nav = document.querySelector(".main-tabs");
+  const allTools = document.getElementById("allToolsSection");
+  if (nav && allTools) nav.after(section);
+  else if (nav) nav.after(section);
+  else {
+    const anchor = document.getElementById("advancedTelemetrySection") || document.getElementById("speedChart")?.closest(".telemetry-section") || document.querySelector(".cards");
+    anchor?.after(section);
+  }
   section.querySelector("#telemetryCsvFile").addEventListener("change", handleFile);
   section.querySelector("#loadTelemetryDataset").addEventListener("click", loadDataset);
   section.querySelector("#clearTelemetryDataset").addEventListener("click", clearDataset);
