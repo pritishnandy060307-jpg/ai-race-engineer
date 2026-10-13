@@ -105,6 +105,10 @@ function ensurePanel() {
   section.querySelector("#telemetryCsvFile").addEventListener("change", handleFile);
   section.querySelector("#loadTelemetryDataset").addEventListener("click", loadDataset);
   section.querySelector("#clearTelemetryDataset").addEventListener("click", clearDataset);
+  document.getElementById("openTelemetryImport")?.addEventListener("click", () => {
+    section.scrollIntoView({ behavior: "smooth", block: "start" });
+    section.querySelector("#telemetryCsvFile")?.focus({ preventScroll: true });
+  });
 }
 function showMessage(message, isError = false) {
   const el = document.getElementById("telemetryImportMessage");
