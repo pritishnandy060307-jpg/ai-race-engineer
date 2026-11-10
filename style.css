@@ -387,3 +387,164 @@ input, select, textarea, button {
         height: 205px;
     }
 }
+
+
+/* Mobile viewport containment: override desktop workspace sizing */
+@media screen and (max-width: 700px) {
+    html, body {
+        width: 100%;
+        min-width: 0;
+        max-width: 100%;
+        overflow-x: hidden !important;
+    }
+
+    body {
+        padding: 8px 6px !important;
+    }
+
+    main.container {
+        display: block;
+        position: relative;
+        width: 100% !important;
+        min-width: 0 !important;
+        max-width: 100% !important;
+        margin: 0 auto !important;
+        padding: 14px 10px !important;
+        overflow: hidden;
+    }
+
+    main.container > *,
+    main.container section,
+    main.container nav,
+    main.container header,
+    main.container .engineering-upgrades,
+    main.container .phase2-details {
+        min-width: 0 !important;
+        max-width: 100% !important;
+    }
+
+    main.container > nav,
+    #toolNavigation,
+    .tool-navigation,
+    .main-tabs {
+        position: static !important;
+        inset: auto !important;
+        float: none !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        box-sizing: border-box !important;
+        margin-inline: 0 !important;
+    }
+
+    #toolNavigation,
+    .tool-navigation {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 7px !important;
+        padding: 8px !important;
+    }
+
+    #toolNavigation .nav-button,
+    .tool-navigation .nav-button {
+        width: 100% !important;
+        min-width: 0 !important;
+        margin: 0 !important;
+        padding: 10px 6px !important;
+        white-space: normal !important;
+        overflow-wrap: anywhere;
+        font-size: 12px !important;
+    }
+
+    .main-tabs {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+        gap: 7px !important;
+        padding: 8px !important;
+    }
+
+    .main-tabs .main-tab {
+        flex: initial !important;
+        width: 100% !important;
+        min-width: 0 !important;
+        min-height: 44px;
+        margin: 0 !important;
+        padding: 9px 6px !important;
+        white-space: normal !important;
+        overflow-wrap: anywhere;
+        font-size: 12px !important;
+        line-height: 1.25;
+    }
+
+    .cards {
+        width: 100% !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    .calculator-grid,
+    .rulebook-controls,
+    .connection-grid,
+    .upgrade-grid {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    .calculator-results,
+    .calculator-results-3,
+    .calculator-results-4,
+    .calculator-results-6,
+    .model-results,
+    .phase2-grid,
+    .performance-telemetry-metrics {
+        grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    }
+
+    .chart-container,
+    .telemetry-section,
+    .calculator-section,
+    .rulebook-section,
+    .all-tools-section,
+    .upgrade-panel,
+    .phase2-panel,
+    .phase2-details,
+    .engineering-upgrades {
+        width: 100% !important;
+        max-width: 100% !important;
+        min-width: 0 !important;
+    }
+
+    .chart-container { height: 220px !important; }
+
+    .track-wrap,
+    .telemetry-chart-grid,
+    .rulebook-grid,
+    .all-tools-grid {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    .rulebook-actions,
+    .upgrade-actions {
+        flex-wrap: wrap;
+    }
+
+    input, select, textarea, button {
+        min-width: 0;
+        max-width: 100%;
+    }
+}
+
+@media screen and (max-width: 380px) {
+    #toolNavigation,
+    .tool-navigation,
+    .main-tabs {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+
+    .calculator-results,
+    .calculator-results-3,
+    .calculator-results-4,
+    .calculator-results-6,
+    .model-results,
+    .phase2-grid,
+    .performance-telemetry-metrics {
+        grid-template-columns: minmax(0, 1fr) !important;
+    }
+}
